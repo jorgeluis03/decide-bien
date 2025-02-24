@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { useNavigation } from '@react-navigation/native';
+import { Link } from 'expo-router';
 
-export default function CandidatoCard({ candidato }) {
-  const navigation = useNavigation();
-
+// Usamos forwardRef para evitar el error de refs en <Link>
+export default function CandidatoCard ({ candidato }){
   return (
     <View style={styles.card}>
       <Image source={candidato.foto} style={styles.image} />
@@ -32,17 +31,16 @@ export default function CandidatoCard({ candidato }) {
           <ThemedText style={styles.trayectoria}>{candidato.trayectoria}</ThemedText>
         )}
 
-        {/* Botón interactivo */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('CandidatoDetalles', { id: candidato.id })}
-        >
-          <ThemedText style={styles.buttonText}>Ver detalles</ThemedText>
-        </TouchableOpacity>
+        {/* Botón interactivo con Link de expo-router */}
+        <Link href={`/(candidatos)/detalle?id=${candidato.id}`} asChild>
+          <TouchableOpacity style={styles.button}>
+            <ThemedText style={styles.buttonText}>Ver detalles</ThemedText>
+          </TouchableOpacity>
+        </Link>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   card: {
