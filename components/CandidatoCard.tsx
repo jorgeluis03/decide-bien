@@ -1,10 +1,25 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Link } from 'expo-router';
 
-// Usamos forwardRef para evitar el error de refs en <Link>
-export default function CandidatoCard ({ candidato }){
+type Candidato = {
+  id: string;
+  nombre: string;
+  foto: any;
+  partido: string;
+  colorPartido?: string;
+  ideologia: string;
+  edad: number;
+  profesion: string;
+  trayectoria?: string;
+};
+
+type CandidatoCardProps = {
+  candidato: Candidato;
+};
+
+export default function CandidatoCard ({ candidato }: CandidatoCardProps) {
   return (
     <View style={styles.card}>
       <Image source={candidato.foto} style={styles.image} />

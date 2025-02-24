@@ -2,7 +2,6 @@ import { FlatList, SafeAreaView, StyleSheet } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { candidatos } from '@/constants/Candidatos';
 import CandidatoCard from '@/components/CandidatoCard';
-import { Link } from 'expo-router';
 
 export default function CandidatosScreen() {
   const insets = useSafeAreaInsets();
