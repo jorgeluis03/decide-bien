@@ -17,5 +17,6 @@ export default function MiembrosScreen() {
 const styles = StyleSheet.create({
     listContainer: {
         padding: 16,
+        backgroundColor: "#fff",
     },
 });

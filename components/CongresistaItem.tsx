@@ -3,12 +3,26 @@ import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { ThemedText } from '@/components/ThemedText';
 
-const CongresistaItem = ({ congresista }) => {
+interface Congresista {
+    id: string;
+    foto: any;
+    nombre: string;
+    edad: number;
+    profesion: string;
+    educacion: string;
+    trayectoria?: string;
+}
+
+interface CongresistaItemProps {
+    congresista: Congresista;
+}
+
+const CongresistaItem: React.FC<CongresistaItemProps> = ({ congresista }) => {
     return (
-        <View style={styles.card}>
+        <View style={styles.container}>
             <View style={styles.imageContainer}>
                 <Image source={congresista.foto} style={styles.image} />
-                <Link href={`/detalle/${congresista.id}`} asChild>
+                <Link href="#" asChild>
                     <TouchableOpacity style={styles.button}>
                         <ThemedText style={styles.buttonText}>Ver más</ThemedText>
                     </TouchableOpacity>
@@ -21,7 +35,9 @@ const CongresistaItem = ({ congresista }) => {
                     <ThemedText style={styles.detail}>🎓 {congresista.profesion}</ThemedText>
                 </View>
                 <ThemedText style={styles.detail}>{congresista.educacion}</ThemedText>
-                {congresista.trayectoria && <ThemedText style={styles.trayectoria}>{congresista.trayectoria}</ThemedText>}
+                {congresista.trayectoria && (
+                    <ThemedText style={styles.trayectoria}>{congresista.trayectoria}</ThemedText>
+                )}
             </View>
         </View>
     );
@@ -30,20 +46,13 @@ const CongresistaItem = ({ congresista }) => {
 export default CongresistaItem;
 
 const styles = StyleSheet.create({
-    card: {
+    container: {
         flexDirection: "row",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 3 },
-        shadowRadius: 6,
-        elevation: 5,
-        borderWidth: 1,
-        borderColor: "#E0E0E0",
+        paddingVertical: 12,
         alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
+        backgroundColor: "#fff",
     },
     imageContainer: {
         alignItems: "center",
@@ -66,14 +75,13 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 6,
         marginTop: 4,
     },
     detail: {
         fontSize: 14,
         color: "#555",
-        flexShrink: 1,
     },
     trayectoria: {
         fontSize: 13,
@@ -87,12 +95,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         backgroundColor: "#0a7ea4",
         borderRadius: 6,
-        alignSelf: "center",
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowOffset: { width: 0, height: 3 },
-        shadowRadius: 6,
-        elevation: 4,
     },
     buttonText: {
         color: "#fff",
