@@ -44,6 +44,7 @@ export default function TabLayout() {
         name="candidatos"
         options={{
           title: 'Candidatos',
+          headerShown: true,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="people" color={color} />,
         }}
       />
