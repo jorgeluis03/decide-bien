@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { TabView, SceneMap, TabBar, NavigationState, SceneRendererProps } from 'react-native-tab-view';
+import { TabView, TabBar } from 'react-native-tab-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PerfilScreen from './PerfilScreen';
 import MiembrosScreen from './MiembrosScreen';
@@ -10,63 +10,56 @@ import MiembrosScreen from './MiembrosScreen';
 interface Route {
   key: string;
   title: string;
-  icon: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
 }
 
-// Definir tipos para la navegación
-interface State extends NavigationState<Route> { }
-
-// Rutas de la aplicación
-const PropuestasRoute: React.FC = React.memo(() => (
+const PropuestasRoute = () => (
   <View style={styles.scene}>
     <Text style={styles.text}>📜 Propuestas del Candidato</Text>
   </View>
-));
-
-const MiembrosRoute: React.FC = React.memo(() => (
-  <MiembrosScreen />
-));
-
-const PerfilRoute: React.FC = React.memo(() => (
-  <PerfilScreen />
-));
+);
 
 const DetalleCandidatoScreen: React.FC = () => {
   const { id } = useLocalSearchParams();
-  const [index, setIndex] = useState<number>(0);
+  const [index, setIndex] = useState(0);
   const [routes] = useState<Route[]>([
     { key: 'propuestas', title: 'Propuestas', icon: 'file-document-outline' },
     { key: 'miembros', title: 'Miembros', icon: 'account-group-outline' },
     { key: 'perfil', title: 'Perfil', icon: 'account-circle-outline' },
   ]);
 
-  const renderScene = SceneMap({
-    propuestas: PropuestasRoute,
-    miembros: MiembrosRoute,
-    perfil: PerfilRoute,
-  });
+  const renderScene = useCallback(({ route }: { route: Route }) => {
+    switch (route.key) {
+      case 'propuestas':
+        return <PropuestasRoute />;
+      case 'miembros':
+        return <MiembrosScreen />;
+      case 'perfil':
+        return <PerfilScreen />;
+      default:
+        return null;
+    }
+  }, []);
 
-  const renderTabBar = (props: SceneRendererProps & { navigationState: State }) => {
-    return (
-      <TabBar
-        {...props}
-        style={styles.tabBar}
-        indicatorStyle={styles.indicator}
-        renderLabel={({ route, focused }) => (
-          <View style={styles.tabItem}>
-            <MaterialCommunityIcons
-              name={route.icon}
-              size={24}
-              color={focused ? '#ffffff' : '#bbbbbb'}
-            />
-            <Text style={[styles.tabText, focused && styles.tabTextActive]}>
-              {route.title}
-            </Text>
-          </View>
-        )}
-      />
-    );
-  };
+  const renderTabBar = useCallback((props: any) => (
+    <TabBar
+      {...props}
+      style={styles.tabBar}
+      indicatorStyle={styles.indicator}
+      renderLabel={({ route, focused }: { route: Route; focused: boolean }) => (
+        <View style={styles.tabItem}>
+          <MaterialCommunityIcons
+            name={route.icon}
+            size={24}
+            color={focused ? '#ffffff' : '#bbbbbb'}
+          />
+          <Text style={[styles.tabText, focused && styles.tabTextActive]}>
+            {route.title}
+          </Text>
+        </View>
+      )}
+    />
+  ), []);
 
   return (
     <View style={styles.container}>
