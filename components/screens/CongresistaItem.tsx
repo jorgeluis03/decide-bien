@@ -22,11 +22,9 @@ const CongresistaItem: React.FC<CongresistaItemProps> = ({ congresista }) => {
         <View style={styles.container}>
             <View style={styles.imageContainer}>
                 <Image source={congresista.foto} style={styles.image} />
-                <Link href="#" asChild>
-                    <TouchableOpacity style={styles.button}>
-                        <ThemedText style={styles.buttonText}>Ver más</ThemedText>
-                    </TouchableOpacity>
-                </Link>
+                <TouchableOpacity style={styles.button}>
+                    <ThemedText style={styles.buttonText}>Ver más</ThemedText>
+                </TouchableOpacity>
             </View>
             <View style={styles.info}>
                 <ThemedText style={styles.name}>{congresista.nombre}</ThemedText>

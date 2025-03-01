@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
 import { fetchData } from "../../utils/fetchData";
+import { Link } from "expo-router";
 
 interface Ley {
   perParId: number;
@@ -126,14 +127,16 @@ export default function LeyesScreen() {
           keyExtractor={(item) => item.pleyNum.toString()}
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <Text style={styles.estado}>{item.desEstado}</Text>
-              <Text style={styles.titulo}>{item.titulo}</Text>
-              <Text style={styles.fecha}>
-                📅 {new Date(item.fecPresentacion).toLocaleDateString()}
-              </Text>
-              <Text style={styles.autores}>🖊 {item.autores}</Text>
-            </View>
+            <Link href={`/(leyes)/detalle?id=${item.pleyNum}`} asChild>
+              <TouchableOpacity style={styles.itemContainer}>
+                <Text style={styles.estado}>{item.desEstado}</Text>
+                <Text style={styles.titulo}>{item.titulo}</Text>
+                <Text style={styles.fecha}>
+                  📅 {new Date(item.fecPresentacion).toLocaleDateString()}
+                </Text>
+                <Text style={styles.autores}>🖊 {item.autores}</Text>
+              </TouchableOpacity>
+            </Link>
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={() => (
