@@ -48,6 +48,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.2.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="leyes"
+        options={{
+          title: 'Leyes',
+          headerShown: true,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="scales" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
