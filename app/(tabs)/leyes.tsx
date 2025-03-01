@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { FlatList, SafeAreaView, StyleSheet, Text, View, TextInput } from "react-native";
+import { useState, useEffect } from "react";
+import { FlatList, SafeAreaView, StyleSheet, Text, View, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useDebounce } from "../../hooks/useDebounce";
 
 interface Ley {
   perParId: number;
@@ -13,36 +14,53 @@ interface Ley {
   autores: string;
 }
 
-const mockLeyes: Ley[] = [
-  {
-    perParId: 2021,
-    pleyNum: 10383,
-    proyectoLey: "10383/2024-CR",
-    desEstado: "PRESENTADO",
-    fecPresentacion: "2025-02-28T00:00:00.000-0500",
-    titulo: "LEY QUE FORTALECE LOS PRINCIPIOS DE TEMPORALIDAD Y ESPECIALIDAD...",
-    desProponente: "Congreso",
-    autores: "Cavero Alva, Alejandro Enrique; Málaga Trillo, George Edward...",
-  },
-  {
-    perParId: 2021,
-    pleyNum: 10382,
-    proyectoLey: "10382/2024-CR",
-    desEstado: "PRESENTADO",
-    fecPresentacion: "2025-02-28T00:00:00.000-0500",
-    titulo: "LEY QUE FORTALECE LA EJECUCIÓN PRESUPUESTAL EN MATERIA DE RIESGOS...",
-    desProponente: "Congreso",
-    autores: "Vergara Mendoza, Elvis Hernán; Alva Rojas, Carlos Enrique...",
-  },
-];
+const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
 
 export default function LeyesScreen() {
-  const [leyes, setLeyes] = useState<Ley[]>(mockLeyes);
+  const [leyes, setLeyes] = useState<Ley[]>([]);
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const filteredLeyes = leyes.filter(
-    (ley) => ley.titulo.toLowerCase().includes(query.toLowerCase())
-  );
+  const debouncedQuery = useDebounce(query, 500);
+
+  useEffect(() => {
+    const fetchLeyes = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            comisionId: null,
+            congresistaId: null,
+            estadoId: null,
+            fecPresentacionDesde: null,
+            fecPresentacionHasta: null,
+            grupoParlamentarioId: null,
+            legislaturaId: null,
+            pageSize: 10,
+            palabras: debouncedQuery || null,
+            perLegId: null,
+            perParId: 2021,
+            pleyNum: null,
+            proponenteId: null,
+            rowStart: 0,
+            tipoFirmanteId: null,
+          }),
+        });
+        const data = await response.json();
+        setLeyes(data.data.proyectos || []);
+      } catch (error) {
+        console.error("Error fetching leyes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeyes();
+  }, [debouncedQuery]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -56,26 +74,37 @@ export default function LeyesScreen() {
           autoCapitalize="none"
           returnKeyType="search"
         />
+        {query.length > 0 && (
+          <TouchableOpacity onPress={() => setQuery("")}>
+            <Ionicons name="close" size={20} color="gray" style={styles.icon} />
+          </TouchableOpacity>
+        )}
       </View>
-      <FlatList
-        data={filteredLeyes}
-        keyExtractor={(item) => item.pleyNum.toString()}
-        contentContainerStyle={styles.listContainer}
-        renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
-            <Text style={styles.estado}>{item.desEstado}</Text>
-            <Text style={styles.titulo}>{item.titulo}</Text>
-            <Text style={styles.fecha}>📅 {new Date(item.fecPresentacion).toLocaleDateString()}</Text>
-            <Text style={styles.autores}>🖊 {item.autores}</Text>
-          </View>
-        )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No se encontraron leyes</Text>
-          </View>
-        )}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : (
+        <FlatList
+          data={leyes}
+          keyExtractor={(item) => item.pleyNum.toString()}
+          contentContainerStyle={styles.listContainer}
+          renderItem={({ item }) => (
+            <View style={styles.itemContainer}>
+              <Text style={styles.estado}>{item.desEstado}</Text>
+              <Text style={styles.titulo}>{item.titulo}</Text>
+              <Text style={styles.fecha}>📅 {new Date(item.fecPresentacion).toLocaleDateString()}</Text>
+              <Text style={styles.autores}>🖊 {item.autores}</Text>
+            </View>
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No se encontraron leyes</Text>
+            </View>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -133,6 +162,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginVertical: 8,
   },
-  icon: { marginRight: 8 },
+  icon: { marginHorizontal: 8 },
   input: { flex: 1, fontSize: 16 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
+
