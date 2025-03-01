@@ -1,5 +1,15 @@
-import { useState, useEffect } from "react";
-import { FlatList, SafeAreaView, StyleSheet, Text, View, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
+import { useState, useEffect, useCallback } from "react";
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  ActivityIndicator,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
 
@@ -15,52 +25,81 @@ interface Ley {
 }
 
 const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
+const PAGE_SIZE = 10; // Número de elementos por página
 
 export default function LeyesScreen() {
   const [leyes, setLeyes] = useState<Ley[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [rowStart, setRowStart] = useState(0);
+  const [totalRows, setTotalRows] = useState(0);
 
   const debouncedQuery = useDebounce(query, 500);
 
-  useEffect(() => {
-    const fetchLeyes = async () => {
-      try {
+  const fetchLeyes = async (reset = false) => {
+    try {
+      if (reset) {
         setLoading(true);
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            comisionId: null,
-            congresistaId: null,
-            estadoId: null,
-            fecPresentacionDesde: null,
-            fecPresentacionHasta: null,
-            grupoParlamentarioId: null,
-            legislaturaId: null,
-            pageSize: 10,
-            palabras: debouncedQuery || null,
-            perLegId: null,
-            perParId: 2021,
-            pleyNum: null,
-            proponenteId: null,
-            rowStart: 0,
-            tipoFirmanteId: null,
-          }),
-        });
-        const data = await response.json();
-        setLeyes(data.data.proyectos || []);
-      } catch (error) {
-        console.error("Error fetching leyes:", error);
-      } finally {
-        setLoading(false);
+      } else {
+        setLoadingMore(true);
       }
-    };
 
-    fetchLeyes();
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          comisionId: null,
+          congresistaId: null,
+          estadoId: null,
+          fecPresentacionDesde: null,
+          fecPresentacionHasta: null,
+          grupoParlamentarioId: null,
+          legislaturaId: null,
+          pageSize: PAGE_SIZE,
+          palabras: debouncedQuery || null,
+          perLegId: null,
+          perParId: 2021,
+          pleyNum: null,
+          proponenteId: null,
+          rowStart: reset ? 0 : rowStart,
+          tipoFirmanteId: null,
+        }),
+      });
+
+      const data = await response.json();
+      const proyectos = data.data?.proyectos || [];
+      const total = data.data?.rowsTotal || 0;
+
+      setTotalRows(total);
+      setLeyes(reset ? proyectos : [...leyes, ...proyectos]);
+      setRowStart(reset ? PAGE_SIZE : rowStart + PAGE_SIZE);
+    } catch (error) {
+      console.error("Error fetching leyes:", error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeyes(true);
   }, [debouncedQuery]);
+
+  const handleLoadMore = () => {
+    if (!loadingMore && leyes.length < totalRows) {
+      fetchLeyes(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchLeyes(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -80,7 +119,8 @@ export default function LeyesScreen() {
           </TouchableOpacity>
         )}
       </View>
-      {loading ? (
+      
+      {loading && leyes.length === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
         </View>
@@ -93,7 +133,9 @@ export default function LeyesScreen() {
             <View style={styles.itemContainer}>
               <Text style={styles.estado}>{item.desEstado}</Text>
               <Text style={styles.titulo}>{item.titulo}</Text>
-              <Text style={styles.fecha}>📅 {new Date(item.fecPresentacion).toLocaleDateString()}</Text>
+              <Text style={styles.fecha}>
+                📅 {new Date(item.fecPresentacion).toLocaleDateString()}
+              </Text>
               <Text style={styles.autores}>🖊 {item.autores}</Text>
             </View>
           )}
@@ -103,6 +145,16 @@ export default function LeyesScreen() {
               <Text style={styles.emptyText}>No se encontraron leyes</Text>
             </View>
           )}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.1}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          ListFooterComponent={() =>
+            loadingMore ? (
+              <ActivityIndicator size="small" color="#007AFF" />
+            ) : null
+          }
         />
       )}
     </SafeAreaView>
@@ -117,6 +169,12 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingTop: 8,
+  },
+  totalText: {
+    fontSize: 14,
+    color: "#555",
+    marginVertical: 8,
+    textAlign: "center",
   },
   emptyContainer: {
     alignItems: "center",
@@ -170,4 +228,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
