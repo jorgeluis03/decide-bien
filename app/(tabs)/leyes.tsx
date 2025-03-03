@@ -3,8 +3,6 @@ import {
   FlatList,
   SafeAreaView,
   StyleSheet,
-  Text,
-  View,
   TextInput,
   ActivityIndicator,
   TouchableOpacity,
@@ -13,6 +11,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
 import { fetchData } from "../../utils/fetchData";
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { Link } from "expo-router";
 
 interface Ley {
@@ -100,7 +100,7 @@ export default function LeyesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.searchBar}>
+      <ThemedView style={styles.searchBar}>
         <Ionicons name="search" size={20} color="gray" style={styles.icon} />
         <TextInput
           style={styles.input}
@@ -115,12 +115,12 @@ export default function LeyesScreen() {
             <Ionicons name="close" size={20} color="gray" style={styles.icon} />
           </TouchableOpacity>
         )}
-      </View>
+      </ThemedView>
 
       {loading && leyes.length === 0 ? (
-        <View style={styles.loadingContainer}>
+        <ThemedView style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
-        </View>
+        </ThemedView>
       ) : (
         <FlatList
           data={leyes}
@@ -129,20 +129,20 @@ export default function LeyesScreen() {
           renderItem={({ item }) => (
             <Link href={`/(leyes)/detalle?id=${item.pleyNum}`} asChild>
               <TouchableOpacity style={styles.itemContainer}>
-                <Text style={styles.estado}>{item.desEstado}</Text>
-                <Text style={styles.titulo}>{item.titulo}</Text>
-                <Text style={styles.fecha}>
+                <ThemedText style={styles.estado}>{item.desEstado}</ThemedText>
+                <ThemedText style={styles.titulo}>{item.titulo}</ThemedText>
+                <ThemedText style={styles.fecha}>
                   📅 {new Date(item.fecPresentacion).toLocaleDateString()}
-                </Text>
-                <Text style={styles.autores}>🖊 {item.autores}</Text>
+                </ThemedText>
+                <ThemedText style={styles.autores}>🖊 {item.autores}</ThemedText>
               </TouchableOpacity>
             </Link>
           )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
           ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No se encontraron leyes</Text>
-            </View>
+            <ThemedView style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>No se encontraron leyes</ThemedText>
+            </ThemedView>
           )}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.1}

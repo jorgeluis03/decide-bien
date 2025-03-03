@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 20, fontWeight: "bold", marginTop: 16, marginBottom: 8 },
   firmanteContainer: { flexDirection: "row", paddingVertical: 12, alignItems: "center", borderBottomWidth: 1, borderBottomColor: "#ddd", backgroundColor: "#fff" },
   imageContainer: { alignItems: "center", marginRight: 16 },
-  image: { width: 60, height: 60, borderRadius: 40, borderWidth: 2, borderColor: "#0a7ea4" },
+  image: { width: 50, height: 50, borderRadius: 40, borderWidth: 2, borderColor: "#0a7ea4" },
   info: { flex: 1 },
   name: { fontSize: 18, fontWeight: "bold", color: "#333" },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
