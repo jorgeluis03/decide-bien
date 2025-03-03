@@ -114,7 +114,7 @@ export default function CongresistasScreen() {
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.itemContainer}>
-                            <Image source={{ uri: item.fotoUrl }} style={styles.image} />
+                            <Image source={require('@/assets/images/perfil.png')} style={styles.image} />
                             <View style={styles.textContainer}>
                                 <Text style={styles.name}>{item.nombre}</Text>
                                 <Text style={styles.party}>{item.partido}</Text>
