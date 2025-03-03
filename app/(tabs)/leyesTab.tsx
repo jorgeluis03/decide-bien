@@ -18,6 +18,7 @@ import { fetchData } from "../../utils/fetchData";
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Link } from "expo-router";
+import DateFilter from "@/components/screens/DateFilter";
 
 interface Ley {
   pleyNum: number;
@@ -30,7 +31,7 @@ interface Ley {
 const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
 const PAGE_SIZE = 10;
 
-export default function LeyesScreen() {
+export default function LeyesTab() {
   const [leyes, setLeyes] = useState<Ley[]>([]);
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
@@ -39,20 +40,30 @@ export default function LeyesScreen() {
   const [rowStart, setRowStart] = useState<number>(0);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [showSearch, setShowSearch] = useState<boolean>(false);
-  
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
+
+
   const debouncedQuery = useDebounce(query, 500);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
   const fetchLeyes = async (reset: boolean = false) => {
     try {
-      if (reset) setLoading(true);
-      else setLoadingMore(true);
+      if (reset) {
+        setLoading(true);
+        setLeyes([]); // Evita duplicados limpiando antes
+      } else {
+        setLoadingMore(true);
+      }
 
       const body = {
         pageSize: PAGE_SIZE,
         palabras: debouncedQuery || null,
         rowStart: reset ? 0 : rowStart,
         perParId: 2021,
+        fecPresentacionDesde: startDate ? startDate.toISOString().split("T")[0] : null,
+        fecPresentacionHasta: endDate ? endDate.toISOString().split("T")[0] : null,
       };
 
       const data = await fetchData<{ data: { proyectos: Ley[], rowsTotal: number } }>(API_URL, "POST", undefined, body);
@@ -71,9 +82,10 @@ export default function LeyesScreen() {
     }
   };
 
+
   useEffect(() => {
     fetchLeyes(true);
-  }, [debouncedQuery]);
+  }, [debouncedQuery, startDate, endDate]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -84,7 +96,7 @@ export default function LeyesScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>      
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
       {!showSearch ? (
         <View style={styles.header}>
           <ThemedText style={styles.headerTitle}>Proyectos de Ley</ThemedText>
@@ -112,7 +124,15 @@ export default function LeyesScreen() {
           </TouchableOpacity>
         </ThemedView>
       )}
-      
+
+      <DateFilter
+        onDateChange={(start, end) => {
+          setStartDate(start);
+          setEndDate(end);
+        }}
+      />
+
+
       {loading && leyes.length === 0 ? (
         <ThemedView style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
