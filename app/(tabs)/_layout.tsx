@@ -60,7 +60,6 @@ export default function TabLayout() {
         name="leyes"
         options={{
           title: 'Leyes',
-          headerShown: true,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="scales" color={color} />,
         }}
       />

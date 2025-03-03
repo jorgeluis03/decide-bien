@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
+  View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -14,6 +15,8 @@ import { fetchData } from "../../utils/fetchData";
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Link } from "expo-router";
+import { StatusBar, Platform } from "react-native";
+
 
 interface Ley {
   perParId: number;
@@ -37,6 +40,7 @@ export default function LeyesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [rowStart, setRowStart] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
+  const [showSearch, setShowSearch] = useState(false);
 
   const debouncedQuery = useDebounce(query, 500);
 
@@ -99,23 +103,34 @@ export default function LeyesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ThemedView style={styles.searchBar}>
-        <Ionicons name="search" size={20} color="gray" style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Buscar ley..."
-          value={query}
-          onChangeText={setQuery}
-          autoCapitalize="none"
-          returnKeyType="search"
-        />
-        {query.length > 0 && (
-          <TouchableOpacity onPress={() => setQuery("")}>
-            <Ionicons name="close" size={20} color="gray" style={styles.icon} />
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
+      {/* Header con botón de búsqueda */}
+      {!showSearch ? (
+        <View style={styles.header}>
+          <ThemedText style={styles.headerTitle}>Proyectos de Ley</ThemedText>
+          <TouchableOpacity onPress={() => setShowSearch(true)}>
+            <Ionicons name="search" size={24} color="black" />
           </TouchableOpacity>
-        )}
-      </ThemedView>
+        </View>
+      ) : (
+        <ThemedView style={styles.searchBar}>
+          <TextInput
+            style={styles.input}
+            placeholder="Buscar ley..."
+            value={query}
+            onChangeText={setQuery}
+            autoCapitalize="none"
+            returnKeyType="search"
+            autoFocus
+          />
+          <TouchableOpacity onPress={() => {
+            setQuery("");
+            setShowSearch(false);
+          }}>
+            <Ionicons name="close" size={24} color="gray" />
+          </TouchableOpacity>
+        </ThemedView>
+      )}
 
       {loading && leyes.length === 0 ? (
         <ThemedView style={styles.loadingContainer}>
@@ -125,7 +140,6 @@ export default function LeyesScreen() {
         <FlatList
           data={leyes}
           keyExtractor={(item) => item.pleyNum.toString()}
-          contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
             <Link href={`/(leyes)/detalle?id=${item.pleyNum}`} asChild>
               <TouchableOpacity style={styles.itemContainer}>
@@ -160,7 +174,25 @@ export default function LeyesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", paddingHorizontal: 10 },
-  listContainer: { paddingTop: 8 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 10, marginTop: 20 },
+  headerTitle: { fontSize: 24, fontWeight: "bold" },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f7f7f7",
+    borderRadius: 30,
+    paddingHorizontal: 12,
+    marginVertical: 8,
+    height: 40,
+    width: "100%",
+  },
+  
+  input: {
+    flex: 1,
+    fontSize: 16,
+    height: 40,
+  },
+
   emptyContainer: { alignItems: "center", marginTop: 20 },
   emptyText: { fontSize: 16, color: "gray" },
   itemContainer: { paddingVertical: 12, paddingHorizontal: 10 },
@@ -169,8 +201,6 @@ const styles = StyleSheet.create({
   fecha: { fontSize: 14, color: "gray" },
   autores: { fontSize: 14, color: "#555", marginTop: 4 },
   separator: { height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 },
-  searchBar: { flexDirection: "row", alignItems: "center", backgroundColor: "#f7f7f7", borderRadius: 30, paddingHorizontal: 12, marginVertical: 8 },
   icon: { marginHorizontal: 8 },
-  input: { flex: 1, fontSize: 16 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 });
