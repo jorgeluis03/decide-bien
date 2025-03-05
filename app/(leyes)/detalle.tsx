@@ -7,6 +7,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import FirmantesLista from "@/components/screens/FirmantesLista";
 import { useRouter } from "expo-router";
+import DescargarPDFButton from "@/components/common/DescargarPDFButton";
 
 const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
 
@@ -34,13 +35,15 @@ export default function DetalleLeyScreen() {
   const [ley, setLey] = useState<Ley | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [seguimientos, setSeguimientos] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchLeyDetails = async () => {
       try {
-        const data = await fetchData<{ code: number; data?: { general: any; firmantes: Firmante[] } }>(`${API_URL}/${id}`);
+        const data = await fetchData<{ code: number; data?: { general: any; firmantes: Firmante[], seguimientos: any } }>(`${API_URL}/${id}`);
         if (data.code === 200 && data.data) {
           setLey({ ...data.data.general, firmantes: data.data.firmantes });
+          setSeguimientos(data.data.seguimientos);
         } else {
           setError("No se encontraron detalles para esta ley.");
         }
@@ -70,6 +73,11 @@ export default function DetalleLeyScreen() {
     );
   }
 
+  const seguimientoPresentado = seguimientos?.find(s => s.desEstado === "PRESENTADO");
+  const proyectoArchivoId = seguimientoPresentado?.archivos?.[0]?.proyectoArchivoId;
+
+  console.log(proyectoArchivoId);
+
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
       {/* Header e Icon Back*/}
@@ -81,8 +89,10 @@ export default function DetalleLeyScreen() {
       </ThemedView>
 
       {/* Contenido de la Ley */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <ThemedText style={styles.title}>{ley?.titulo}</ThemedText>
+        <DescargarPDFButton archivo={proyectoArchivoId} />
+
         <ThemedView style={styles.infoBox}>
           <Ionicons name="document-text" size={24} color="#007AFF" />
           <ThemedText style={styles.subtitle}>{ley?.desEstado}</ThemedText>
@@ -113,7 +123,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 32, paddingHorizontal: 10 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { fontSize: 16, color: "red", textAlign: "center" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 8, color: "#222" },
+  title: { fontSize: 24, fontWeight: "bold", color: "#222" },
   infoBox: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
   subtitle: { fontSize: 18, fontWeight: "600", color: "#007AFF", marginLeft: 8 },
   sumilla: { fontSize: 14, marginTop: 8, textAlign: "justify", backgroundColor: "#e6f7ff", padding: 10, borderRadius: 6 },
