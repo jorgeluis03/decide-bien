@@ -15,10 +15,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
 import { fetchData } from "../../utils/fetchData";
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Link } from "expo-router";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import DateFilter from "@/components/screens/DateFilter";
+import LeyItem from "@/components/screens/LeyItem";
 
 interface Ley {
   pleyNum: number;
@@ -43,8 +43,6 @@ export default function LeyesTab() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
-
-
   const debouncedQuery = useDebounce(query, 500);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
@@ -52,7 +50,7 @@ export default function LeyesTab() {
     try {
       if (reset) {
         setLoading(true);
-        setLeyes([]); // Evita duplicados limpiando antes
+        setLeyes([]);
       } else {
         setLoadingMore(true);
       }
@@ -66,7 +64,7 @@ export default function LeyesTab() {
         fecPresentacionHasta: endDate ? endDate.toISOString().split("T")[0] : null,
       };
 
-      const data = await fetchData<{ data: { proyectos: Ley[], rowsTotal: number } }>(API_URL, "POST", undefined, body);
+      const data = await fetchData<{ data: { proyectos: Ley[]; rowsTotal: number } }>(API_URL, "POST", undefined, body);
       const proyectos = data?.data?.proyectos || [];
       const total = data?.data?.rowsTotal || 0;
 
@@ -82,7 +80,6 @@ export default function LeyesTab() {
     }
   };
 
-
   useEffect(() => {
     fetchLeyes(true);
   }, [debouncedQuery, startDate, endDate]);
@@ -96,7 +93,7 @@ export default function LeyesTab() {
   }, []);
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
       {!showSearch ? (
         <View style={styles.header}>
           <ThemedText style={styles.headerTitle}>Proyectos de Ley</ThemedText>
@@ -116,10 +113,12 @@ export default function LeyesTab() {
             autoFocus
             clearButtonMode="while-editing"
           />
-          <TouchableOpacity onPress={() => {
-            setQuery("");
-            setShowSearch(false);
-          }}>
+          <TouchableOpacity
+            onPress={() => {
+              setQuery("");
+              setShowSearch(false);
+            }}
+          >
             <Ionicons name="close" size={24} color="gray" />
           </TouchableOpacity>
         </ThemedView>
@@ -132,7 +131,6 @@ export default function LeyesTab() {
         }}
       />
 
-
       {loading && leyes.length === 0 ? (
         <ThemedView style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
@@ -142,16 +140,7 @@ export default function LeyesTab() {
           <FlatList
             data={leyes}
             keyExtractor={(item) => item.pleyNum.toString()}
-            renderItem={({ item }) => (
-              <Link href={`/(leyes)/detalle?id=${item.pleyNum}`} asChild>
-                <TouchableOpacity style={styles.itemContainer}>
-                  <ThemedText style={styles.estado}>{item.desEstado}</ThemedText>
-                  <ThemedText style={styles.titulo}>{item.titulo}</ThemedText>
-                  <ThemedText style={styles.fecha}>📅 {new Date(item.fecPresentacion).toLocaleDateString()}</ThemedText>
-                  <ThemedText style={styles.autores}>🖊 {item.autores}</ThemedText>
-                </TouchableOpacity>
-              </Link>
-            )}
+            renderItem={({ item }) => <LeyItem {...item} />}
             ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchLeyes(true)} />}
             ListFooterComponent={() => loadingMore && <ActivityIndicator size="small" color="#007AFF" />}
@@ -169,10 +158,5 @@ const styles = StyleSheet.create({
   searchBar: { flexDirection: "row", alignItems: "center", backgroundColor: "#f7f7f7", borderRadius: 30, paddingHorizontal: 12, marginVertical: 8, height: 40, width: "100%" },
   input: { flex: 1, fontSize: 16, height: 40 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  itemContainer: { paddingVertical: 12, paddingHorizontal: 10 },
-  estado: { fontSize: 14, fontWeight: "bold", color: "#007AFF" },
-  titulo: { fontSize: 16, fontWeight: "600", marginVertical: 4 },
-  fecha: { fontSize: 14, color: "gray" },
-  autores: { fontSize: 14, color: "#555", marginTop: 4 },
   separator: { height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 },
 });
