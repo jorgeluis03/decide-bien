@@ -51,6 +51,7 @@ export default function LeyesTab() {
       if (reset) {
         setLoading(true);
         setLeyes([]);
+        setRowStart(0);
       } else {
         setLoadingMore(true);
       }
@@ -92,8 +93,14 @@ export default function LeyesTab() {
     }).start();
   }, []);
 
+  const loadMoreLeyes = () => {
+    if (!loadingMore && leyes.length < totalRows) {
+      fetchLeyes(false);
+    }
+  };
+
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}> 
       {!showSearch ? (
         <View style={styles.header}>
           <ThemedText style={styles.headerTitle}>Proyectos de Ley</ThemedText>
@@ -113,17 +120,12 @@ export default function LeyesTab() {
             autoFocus
             clearButtonMode="while-editing"
           />
-          <TouchableOpacity
-            onPress={() => {
-              setQuery("");
-              setShowSearch(false);
-            }}
-          >
+          <TouchableOpacity onPress={() => { setQuery(""); setShowSearch(false); }}>
             <Ionicons name="close" size={24} color="gray" />
           </TouchableOpacity>
         </ThemedView>
       )}
-
+      
       <DateFilter
         onDateChange={(start, end) => {
           setStartDate(start);
@@ -144,6 +146,8 @@ export default function LeyesTab() {
             ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchLeyes(true)} />}
             ListFooterComponent={() => loadingMore && <ActivityIndicator size="small" color="#007AFF" />}
+            onEndReached={loadMoreLeyes}
+            onEndReachedThreshold={0.5}
           />
         </Animated.View>
       )}
