@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, ActivityIndicator, StyleSheet, ScrollView, Linking, Image, TouchableOpacity } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fetchData } from "../../utils/fetchData";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import FirmantesLista from "@/components/screens/FirmantesLista";
+import { useRouter } from "expo-router";
 
 const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
 
@@ -25,6 +29,7 @@ interface Ley {
 }
 
 export default function DetalleLeyScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [ley, setLey] = useState<Ley | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,71 +71,56 @@ export default function DetalleLeyScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.title}>{ley?.titulo}</Text>
-      <View style={styles.infoBox}>
-        <Ionicons name="document-text" size={24} color="#007AFF" />
-        <Text style={styles.subtitle}>{ley?.desEstado}</Text>
-      </View>
-      <View style={styles.infoBox}>
-        <Ionicons name="calendar" size={24} color="#007AFF" />
-        <Text style={styles.date}>{ley?.fecPresentacion}</Text>
-      </View>
-      <View style={styles.infoBox}>
-        <Ionicons name="people" size={24} color="#007AFF" />
-        <Text style={styles.proponente}>{ley?.desProponente}</Text>
-      </View>
-      <View style={styles.infoBox}>
-        <Ionicons name="briefcase" size={24} color="#007AFF" />
-        <Text style={styles.group}>{ley?.desGpar}</Text>
-      </View>
-      <Text style={styles.sumilla}>{ley?.sumilla}</Text>
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
+      {/* Header e Icon Back*/}
+      <ThemedView style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <ThemedText style={styles.headerTitle}>Detalles de Ley</ThemedText>
+      </ThemedView>
 
-      <Text style={styles.sectionTitle}>👥 Firmantes:</Text>
-      {ley?.firmantes.map((firmante) => (
-        <View key={firmante.firmanteId} style={styles.firmanteContainer}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: `https://ui-avatars.com/api/?name=${firmante.nombre}&background=0a7ea4&color=fff` }}
-              style={styles.image}
-            />
-          </View>
-          <View style={styles.info}>
-            <Text style={styles.name}>{firmante.nombre}</Text>
-            <View style={styles.row}>
-              <Text style={styles.detail}>DNI: {firmante.dni}</Text>
-              <Text style={styles.detail}>{firmante.sexo === 'M' ? '♂️' : '♀️'}</Text>
-            </View>
-            <TouchableOpacity style={styles.button} onPress={() => Linking.openURL(firmante.pagWeb)}>
-              <Text style={styles.buttonText}>🔗 Ver perfil</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ))}
-    </ScrollView>
+      {/* Contenido de la Ley */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ThemedText style={styles.title}>{ley?.titulo}</ThemedText>
+        <ThemedView style={styles.infoBox}>
+          <Ionicons name="document-text" size={24} color="#007AFF" />
+          <ThemedText style={styles.subtitle}>{ley?.desEstado}</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.infoBox}>
+          <Ionicons name="calendar" size={24} color="#007AFF" />
+          <ThemedText style={styles.date}>{ley?.fecPresentacion}</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.infoBox}>
+          <Ionicons name="people" size={24} color="#007AFF" />
+          <ThemedText style={styles.proponente}>{ley?.desProponente}</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.infoBox}>
+          <Ionicons name="briefcase" size={24} color="#007AFF" />
+          <ThemedText style={styles.group}>{ley?.desGpar}</ThemedText>
+        </ThemedView>
+        <ThemedText style={styles.sumilla}>{ley?.sumilla}</ThemedText>
+
+        {/* Firmantes */}
+        {ley?.firmantes && <FirmantesLista firmantes={ley.firmantes} />}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF", padding: 16 },
-  scrollContent: { paddingBottom: 32 },
+  container: { flex: 1, backgroundColor: "#fff", paddingHorizontal: 10 },
+  scrollContent: { paddingBottom: 32, paddingHorizontal: 10 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { fontSize: 16, color: "red", textAlign: "center" },
   title: { fontSize: 24, fontWeight: "bold", marginBottom: 8, color: "#222" },
   infoBox: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
   subtitle: { fontSize: 18, fontWeight: "600", color: "#007AFF", marginLeft: 8 },
+  sumilla: { fontSize: 14, marginTop: 8, textAlign: "justify", backgroundColor: "#e6f7ff", padding: 10, borderRadius: 6 },
+  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 10, marginTop: 20, marginBottom: 10 },
+  headerTitle: { flex: 1, fontSize: 24, fontWeight: "600", textAlign: "center", marginRight: 24 },
   date: { fontSize: 14, color: "gray", marginLeft: 8 },
   proponente: { fontSize: 16, fontWeight: "bold", marginLeft: 8 },
   group: { fontSize: 16, fontStyle: "italic", marginLeft: 8 },
-  sumilla: { fontSize: 14, marginTop: 8, textAlign: "justify", backgroundColor: "#e6f7ff", padding: 10, borderRadius: 6 },
-  sectionTitle: { fontSize: 20, fontWeight: "bold", marginTop: 16, marginBottom: 8 },
-  firmanteContainer: { flexDirection: "row", paddingVertical: 12, alignItems: "center", borderBottomWidth: 1, borderBottomColor: "#ddd", backgroundColor: "#fff" },
-  imageContainer: { alignItems: "center", marginRight: 16 },
-  image: { width: 50, height: 50, borderRadius: 40, borderWidth: 2, borderColor: "#0a7ea4" },
-  info: { flex: 1 },
-  name: { fontSize: 18, fontWeight: "bold", color: "#333" },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
-  detail: { fontSize: 14, color: "#555" },
-  button: { marginTop: 8, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: "#0a7ea4", borderRadius: 6 },
-  buttonText: { color: "#fff", fontWeight: "bold", fontSize: 14 },
 });
+

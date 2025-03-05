@@ -13,7 +13,8 @@ export default function LeyesLayout() {
             title: 'Detalles de Ley',
             headerTitleStyle: {
               fontWeight: 'medium',
-            }
+            },
+            headerShown: false,
           }}
         />
       </Stack>
