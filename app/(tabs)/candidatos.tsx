@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { FlatList, SafeAreaView, StyleSheet, Text, View, Image } from "react-native";
-import SearchScreen from "@/components/SearchScreen";
 
 export default function CandidatosScreen() {
   const [cocktails, setCocktails] = useState<any[]>([]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <SearchScreen onSearchResults={setCocktails} />
 
       <FlatList
         data={cocktails}

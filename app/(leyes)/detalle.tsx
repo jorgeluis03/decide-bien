@@ -8,6 +8,7 @@ import { ThemedView } from "@/components/ThemedView";
 import FirmantesLista from "@/components/screens/FirmantesLista";
 import { useRouter } from "expo-router";
 import DescargarPDFButton from "@/components/common/DescargarPDFButton";
+import FloatingActionButton from "@/components/common/FloatingActionButton";
 
 const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
 
@@ -36,6 +37,7 @@ export default function DetalleLeyScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [seguimientos, setSeguimientos] = useState<any[]>([]);
+  const [isFabOpen, setIsFabOpen] = useState(false);
 
   useEffect(() => {
     const fetchLeyDetails = async () => {
@@ -76,10 +78,16 @@ export default function DetalleLeyScreen() {
   const seguimientoPresentado = seguimientos?.find(s => s.desEstado === "PRESENTADO");
   const proyectoArchivoId = seguimientoPresentado?.archivos?.[0]?.proyectoArchivoId;
 
-  console.log(proyectoArchivoId);
-
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
+      {/* Overlay semitransparente */}
+      {isFabOpen && (
+        <TouchableOpacity
+          style={styles.overlay}
+          activeOpacity={1}
+          onPress={() => setIsFabOpen(false)}
+        />
+      )}
       {/* Header e Icon Back*/}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -91,6 +99,7 @@ export default function DetalleLeyScreen() {
       {/* Contenido de la Ley */}
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <ThemedText style={styles.title}>{ley?.titulo}</ThemedText>
+        {/* Descargar */}
         <DescargarPDFButton archivo={proyectoArchivoId} />
 
         <ThemedView style={styles.infoBox}>
@@ -114,6 +123,15 @@ export default function DetalleLeyScreen() {
         {/* Firmantes */}
         {ley?.firmantes && <FirmantesLista firmantes={ley.firmantes} />}
       </ScrollView>
+
+      {/* Boton flotante */}
+      <FloatingActionButton
+        onCommentPress={() => console.log("Abrir comentarios")}
+        onVotePress={() => console.log("Votar por la ley")}
+        onToggle={(isOpen) => setIsFabOpen(isOpen)}
+        isOpen={isFabOpen}
+      />
+
     </SafeAreaView>
   );
 }
@@ -132,5 +150,10 @@ const styles = StyleSheet.create({
   date: { fontSize: 14, color: "gray", marginLeft: 8 },
   proponente: { fontSize: 16, fontWeight: "bold", marginLeft: 8 },
   group: { fontSize: 16, fontStyle: "italic", marginLeft: 8 },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    zIndex: 1,
+  },
 });
 
