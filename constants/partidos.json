@@ -1,0 +1,776 @@
+[
+  {
+    "numero": "001",
+    "nombre": "ACCION POPULAR",
+    "fecha_inscripcion": "04/08/2004",
+    "direccion": "AV. 9 DE DICIEMBRE (EX PASEO COLON) N° 218 - LIMA - LIMA - LIMA",
+    "telefonos": "3321965, 999891300",
+    "web": "accionpopular.com.pe/",
+    "email": "fariasstella@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Alterno",
+        "nombre": "Arias Stella Castillo Fernando Luis"
+      }
+    ]
+  },
+  {
+    "numero": "002",
+    "nombre": "AHORA NACION - AN",
+    "fecha_inscripcion": "24/07/2024",
+    "direccion": "JR. ISIDRO ALCIBAR N° 142, URB. INGENIERÍA - LIMA - LIMA - SAN MARTIN DE PORRES",
+    "telefonos": "-, 942782097",
+    "web": "ahoranacion.org.pe",
+    "email": "ahoranacion@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Lopez Chau Pastor Luis Alfonso"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Machuca Castillo Nelson Gido"
+      }
+    ]
+  },
+  {
+    "numero": "003",
+    "nombre": "ALIANZA NACIONAL DE TRABAJADORES AGRICULTORES UNIVERSITARIOS RESERVISTAS Y OBREROS",
+    "fecha_inscripcion": "12/12/2023",
+    "direccion": "JR. Barbara Alcázar N° 172, URB. Pando - LIMA - LIMA - SAN MIGUEL",
+    "telefonos": "-, 965084050",
+    "web": "www.alianzanacional.pe",
+    "email": "exica3@hotmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Ramos Zapana Ruben"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Prieto Barrera Americo Augusto"
+      }
+    ]
+  },
+  {
+    "numero": "004",
+    "nombre": "ALIANZA PARA EL PROGRESO",
+    "fecha_inscripcion": "12/02/2008",
+    "direccion": "AV. DE LA POLICIA N° 643 - LIMA - LIMA - JESUS MARIA",
+    "telefonos": "2024600, 991156135",
+    "web": "www.app.pe",
+    "email": "personerolegal@app.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Cabrera Alvarado Carlos Enrique"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Lozano Millones Jaqueline Yessenia"
+      }
+    ]
+  },
+  {
+    "numero": "005",
+    "nombre": "AVANZA PAIS - PARTIDO DE INTEGRACION SOCIAL",
+    "fecha_inscripcion": "10/05/2017",
+    "direccion": "JR. LOS JAZMINES N° 411 - LIMA - LIMA - LINCE",
+    "telefonos": "951587488, 951587488",
+    "web": "www.avanzapaisperu.com",
+    "email": "aldo.borrero.rojas@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Borrero Rojas Aldo Fabrizio"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Barraza Rivas Mario Nelson"
+      }
+    ]
+  },
+  {
+    "numero": "006",
+    "nombre": "BATALLA PERU",
+    "fecha_inscripcion": "31/01/2025",
+    "direccion": "JR. RUFINO TORRICO N° 1079 - LIMA - LIMA - LIMA",
+    "telefonos": "-, 920628207",
+    "web": "www.batallaperu.pe",
+    "email": "partidopoliticobatallaperu@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Turco Huaman Keelin Melissa"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Romero Cristobal Luis Alberto"
+      }
+    ]
+  },
+  {
+    "numero": "007",
+    "nombre": "FE EN EL PERU",
+    "fecha_inscripcion": "14/02/2023",
+    "direccion": "CALLE LOS MAGISTRADOS N° 119, URB. LOS MAGISTRADOS - LIMA - LIMA - LA MOLINA",
+    "telefonos": "-, 924821634",
+    "web": "www.feenelperu.pe",
+    "email": "administracion@feenelperu.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Garcia Lazo Franco Miguel"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Villavicencio Meza Kardy"
+      }
+    ]
+  },
+  {
+    "numero": "008",
+    "nombre": "FRENTE POPULAR AGRICOLA FIA DEL PERU",
+    "fecha_inscripcion": "14/02/2023",
+    "direccion": "JR. LAMPA N° 1048 - 1050 - LIMA - LIMA - LIMA",
+    "telefonos": "2753967, 952519868",
+    "web": "www.frepap.org.pe",
+    "email": "caluceh@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Ceron Huaman Carmen Lupe"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Inca Gomez Jose Luis"
+      }
+    ]
+  },
+  {
+    "numero": "009",
+    "nombre": "FUERZA POPULAR",
+    "fecha_inscripcion": "09/03/2010",
+    "direccion": "PARQUE HERNAN VELARDE N° 038, URB. SANTA BEATRIZ - LIMA - LIMA - LIMA",
+    "telefonos": "956020838, 966874944",
+    "web": "https://fuerzapopular.com.pe/",
+    "email": "personeriafp@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Chavez Cossio Martha Gladys"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Condezo Paredes Marjorie Rosario"
+      }
+    ]
+  },
+  {
+    "numero": "010",
+    "nombre": "JUNTOS POR EL PERU",
+    "fecha_inscripcion": "23/11/2009",
+    "direccion": "JR. TARMA N° 361 - LIMA - LIMA - LIMA",
+    "telefonos": ", 957583207",
+    "web": "www.jp.org.pe",
+    "email": "personero.jp@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Zafra Flores Carlos Adeval"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Yovera Coveñas Arsy"
+      }
+    ]
+  },
+  {
+    "numero": "011",
+    "nombre": "LIBERTAD POPULAR",
+    "fecha_inscripcion": "08/06/2023",
+    "direccion": "AV. LOS INCAS N° 172, - LIMA - LIMA - SAN ISIDRO",
+    "telefonos": "-, 996608100",
+    "web": "www.libertadpopular.org.pe",
+    "email": "partido.libertad.popular@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Haro Cabello Jesus Marcelino"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Garces Manyari Alfonso Jesus"
+      }
+    ]
+  },
+  {
+    "numero": "012",
+    "nombre": "NUEVO PERU POR EL BUEN VIVIR",
+    "fecha_inscripcion": "03/07/2024",
+    "direccion": "PLAZA BOLOGNESI N° 590 - LIMA - LIMA - BREÑA",
+    "telefonos": ", 948499814",
+    "web": "https://nuevoperu.pe",
+    "email": "secretariageneral@nuevoperu.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Leon Gonzales Enver Mao"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Leon Vidal Vladimir Horacio"
+      }
+    ]
+  },
+  {
+    "numero": "013",
+    "nombre": "PARTIDO APRISTA PERUANO",
+    "fecha_inscripcion": "24/03/2023",
+    "direccion": "AV. Alfonso Ugarte N° 1012 - LIMA - LIMA - BREÑA",
+    "telefonos": "-, 969136165",
+    "web": "www.apraoficial.com",
+    "email": "msj37@hotmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Mejia Seminario Juan Segundo Carlos"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Sanchez Huaman Luis Alberto"
+      }
+    ]
+  },
+  {
+    "numero": "014",
+    "nombre": "PARTIDO CIUDADANOS POR EL PERU",
+    "fecha_inscripcion": "17/01/2025",
+    "direccion": "SECTOR HEROES DEL CENEPA Mz. F Lote 1,  VIRGEN DE LOURDES - NUEVA ESPERANZA - LIMA - LIMA - VILLA MARIA DEL TRIUNFO",
+    "telefonos": "900953307, 975094556",
+    "web": "ciudadanosporelperu.com",
+    "email": "eduarte3035@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Murrugarra Ramirez Luciano Alfredo"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Bravo Nuñez Nilda Flor"
+      }
+    ]
+  },
+  {
+    "numero": "015",
+    "nombre": "PARTIDO CIVICO OBRAS",
+    "fecha_inscripcion": "15/07/2024",
+    "direccion": "JR. DE LA UNIÓN N° 1087 Dpto. 203 Int. A - LIMA - LIMA - LIMA",
+    "telefonos": "-, 985401735",
+    "web": "https://partidopoliticocivicoobras.com/",
+    "email": "lolofernandezespinoza@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Carazas Pedreros Margarita Susana"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Onsihuay Trujillo Yackylin"
+      }
+    ]
+  },
+  {
+    "numero": "016",
+    "nombre": "PARTIDO DE LOS TRABAJADORES Y EMPRENDEDORES PTE - PERU",
+    "fecha_inscripcion": "05/04/2024",
+    "direccion": "JR. SANTA ROSA N° 360 - LIMA - LIMA - LIMA",
+    "telefonos": ", 975081227",
+    "web": "www.pte.pe",
+    "email": "contactonacional@pte.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Boza Pulido Jose Antonio"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Bautista Merino Alberto Juan"
+      }
+    ]
+  },
+  {
+    "numero": "017",
+    "nombre": "PARTIDO DEL BUEN GOBIERNO",
+    "fecha_inscripcion": "02/08/2024",
+    "direccion": "AV. 9 DE DICEMBRE (EX PASEO COLÓN) N° 301,  CERCADO DE LIMA - LIMA - LIMA - LIMA",
+    "telefonos": "-, 996174416",
+    "web": "www.partidodelbuengobierno.pe",
+    "email": "jonimon@yahoo.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Ferruzo Vallejos Maria Mercedes"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Paredes Torres Michael Alberto"
+      }
+    ]
+  },
+  {
+    "numero": "018",
+    "nombre": "PARTIDO DEMOCRATA UNIDO PERU",
+    "fecha_inscripcion": "13/03/2023",
+    "direccion": "JR. CARABAYA N° 1159 Dpto. 810 - LIMA - LIMA - LIMA",
+    "telefonos": "953 564 557, 993672655",
+    "web": "https://partidodemocrataunidoperu.com/",
+    "email": "charliecarrascosalazar1@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Huayhua Champi Ana Elvira"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Herrera Romero Dionicio Julio"
+      }
+    ]
+  },
+  {
+    "numero": "019",
+    "nombre": "PARTIDO DEMOCRATA VERDE",
+    "fecha_inscripcion": "14/02/2023",
+    "direccion": "CALLE MANUEL ARRISUEÑO N° 683 Int. 302, URB. SANTA CATALINA - LIMA - LIMA - LA VICTORIA",
+    "telefonos": "-, 942476667",
+    "web": "http://www.democrataverde.com/",
+    "email": "pdemocrataverde@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Mejia Perales Juan Mauricio"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Bejarano Suta de Villalobos Erika Nelida"
+      }
+    ]
+  },
+  {
+    "numero": "020",
+    "nombre": "PARTIDO DEMOCRATICO FEDERAL",
+    "fecha_inscripcion": "21/01/2025",
+    "direccion": "AV. LAS ARTES SUR N° 665 - LIMA - LIMA - SAN BORJA",
+    "telefonos": "-, 947037627",
+    "web": "democraticofederal.com",
+    "email": "w.gamonal@udl.edu.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Gamonal Bravo Walter"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Acuña Chaparro Andy Virgilio"
+      }
+    ]
+  },
+  {
+    "numero": "021",
+    "nombre": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "fecha_inscripcion": "22/11/2004",
+    "direccion": "JR. TORRE DE LA MERCED N° 165-167, URB. SANTA CATALINA - LIMA - LIMA - LA VICTORIA",
+    "telefonos": "373 2581, 997299382",
+    "web": "www.somosperu.pe",
+    "email": "partidosomosperu@outlook.com",
+    "personeros": [
+      {
+        "tipo": "Alterno",
+        "nombre": "Atencio Diaz Alexis Bryan"
+      }
+    ]
+  },
+  {
+    "numero": "022",
+    "nombre": "PARTIDO FRENTE DE LA ESPERANZA 2021",
+    "fecha_inscripcion": "16/09/2021",
+    "direccion": "JR. Bolognesi N° 775 Dpto. Edificio H, Dpto. 203, referencia: Plaza Sechin - LIMA - LIMA - SAN MIGUEL",
+    "telefonos": "936371219, 995172602",
+    "web": "www.partidofrentedelaesperanza2021.pe",
+    "email": "frenteesperanza.fe@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Yataco Yataco Jorge Luis"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Solf Monsalve Alfredo Antonio Milagros"
+      }
+    ]
+  },
+  {
+    "numero": "023",
+    "nombre": "PARTIDO MORADO",
+    "fecha_inscripcion": "01/03/2019",
+    "direccion": "CALLE IGNACIO MERINO N° 375 - LIMA - LIMA - MIRAFLORES",
+    "telefonos": "No consigna, 965942063",
+    "web": "www.partidomorado.pe",
+    "email": "mauriciopalomino.pm@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Palomino Vidal Mauricio Enrique"
+      }
+    ]
+  },
+  {
+    "numero": "024",
+    "nombre": "PARTIDO PAIS PARA TODOS",
+    "fecha_inscripcion": "02/08/2024",
+    "direccion": "CALLE ROMA N° 314 - LIMA - LIMA - SAN ISIDRO",
+    "telefonos": "-, 996976287",
+    "web": "www.partidopaisparatodos.org.pe",
+    "email": "william2966@hotmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Meza Valencia William Amilcar"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Huertas Pajuelo Enrique Pompeyo"
+      }
+    ]
+  },
+  {
+    "numero": "025",
+    "nombre": "PARTIDO PATRIOTICO DEL PERU",
+    "fecha_inscripcion": "29/03/2022",
+    "direccion": "CALLE LA LADERA Mz. T Lote 5, URB. SIRIUS II ETAPA - LIMA - LIMA - LA MOLINA",
+    "telefonos": "3659010, 999097912",
+    "web": "https://partidopatrioticodelperu.org/",
+    "email": "partidopatrioticodelperu.ppp@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Diaz Espinoza Victor Javier"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Prada Gutierrez Fernando"
+      }
+    ]
+  },
+  {
+    "numero": "026",
+    "nombre": "PARTIDO POLITICO COOPERACION POPULAR",
+    "fecha_inscripcion": "25/11/2024",
+    "direccion": "JR. SAN JUDAS TADEO N° 126, URB. SAN JUAN BAUTISTA - LIMA - LIMA - COMAS",
+    "telefonos": "-, 984449675",
+    "web": "www.cooperacionpopular.com",
+    "email": "partidocooperacionpopular@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Rodas Borja Pierre Alexander"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Molina Lopez Jesus Roy"
+      }
+    ]
+  },
+  {
+    "numero": "027",
+    "nombre": "PARTIDO POLITICO FUERZA MODERNA",
+    "fecha_inscripcion": "07/08/2024",
+    "direccion": "AV. 09 DE DICIEMBRE N° 307-309, OTROS CERCADO DE LIMA - LIMA - LIMA - LIMA",
+    "telefonos": "-, 996200115",
+    "web": "fuerzamoderna.org.pe",
+    "email": "aviera@fuerzamoderna.org.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Viera Requena Alvaro Mauricio"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Green Barrueta Nataly Maria del Rosario"
+      }
+    ]
+  },
+  {
+    "numero": "028",
+    "nombre": "PARTIDO POLITICO NACIONAL PERU LIBRE",
+    "fecha_inscripcion": "15/01/2016",
+    "direccion": "AV. BRASIL N° 170 Dpto. 3er piso - LIMA - LIMA - BREÑA",
+    "telefonos": "980839345, 964687880",
+    "web": "https://perulibre.pe/",
+    "email": "acordova.asesor@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Cordova Capucho Ana Maria"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Carrion Romero Mercedes Irene"
+      }
+    ]
+  },
+  {
+    "numero": "029",
+    "nombre": "PARTIDO POLITICO PERU ACCION",
+    "fecha_inscripcion": "25/07/2023",
+    "direccion": "AV. Camino Real N° 111 Dpto. 501, referencia: Torre A - LIMA - LIMA - SAN ISIDRO",
+    "telefonos": "-, 958494275",
+    "web": "www.peruaccion.pe",
+    "email": "sliz_3108@hotmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Camacho Lazarte Jonathan Ricardo"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Alarco Soares Miguel Enrique"
+      }
+    ]
+  },
+  {
+    "numero": "030",
+    "nombre": "PARTIDO POLITICO PERU PRIMERO",
+    "fecha_inscripcion": "19/06/2023",
+    "direccion": "CALLE CHACARILLA N° 430 - LIMA - LIMA - SAN ISIDRO",
+    "telefonos": "7606496, 970182261",
+    "web": "peruprimero.pe",
+    "email": "comunicaciones@peruprimero.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Illanes Calderon Carlos Hernan"
+      }
+    ]
+  },
+  {
+    "numero": "031",
+    "nombre": "PARTIDO POLITICO PERUANOS UNIDOS : ¡SOMOS LIBRES!",
+    "fecha_inscripcion": "20/11/2024",
+    "direccion": "AV. JAVIER PRADO ESTE N° 560,  OFICINA N° 1403 - LIMA - LIMA - SAN ISIDRO",
+    "telefonos": "996284078, 966137724",
+    "web": "www.peruanosunidossomoslibres.com",
+    "email": "renato.galvez.barbieri@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Galvez Barbieri Renato Tomas"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Lopez Lopez Hernan Enrique"
+      }
+    ]
+  },
+  {
+    "numero": "032",
+    "nombre": "PARTIDO POLITICO POPULAR VOCES DEL PUEBLO",
+    "fecha_inscripcion": "23/10/2024",
+    "direccion": "Mz. 55 Lote 01, AAHH HUÁSCAR GRUPO 6 SECTOR A - LIMA - LIMA - SAN JUAN DE LURIGANCHO",
+    "telefonos": "-, 961746091",
+    "web": "vocesdelpueblo.pe",
+    "email": "jvelazcopalomino@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Velazco Palomino Junior Bryand"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Trinidad Abarca Luis Miguel"
+      }
+    ]
+  },
+  {
+    "numero": "033",
+    "nombre": "PARTIDO POLITICO PRIN",
+    "fecha_inscripcion": "19/01/2023",
+    "direccion": "AV. Argentina N° 2530 - LIMA - LIMA - LIMA",
+    "telefonos": ", 994025398",
+    "web": "http://prin.org.pe",
+    "email": "personeralegalprin@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Alterno",
+        "nombre": "Navarro Amaro Victor Augusto"
+      }
+    ]
+  },
+  {
+    "numero": "034",
+    "nombre": "PARTIDO POPULAR CRISTIANO - PPC",
+    "fecha_inscripcion": "10/05/2024",
+    "direccion": "AV. ALFONSO UGARTE N° 1484 - LIMA - LIMA - BREÑA",
+    "telefonos": "2266470, 999043994",
+    "web": "www.ppcperu.pe",
+    "email": "lflores@lfnabogados.com.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Flores Nano Lourdes Celmira Rosario"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Alayo Ramos Cesar Augusto"
+      }
+    ]
+  },
+  {
+    "numero": "035",
+    "nombre": "PARTIDO SICREO",
+    "fecha_inscripcion": "18/03/2024",
+    "direccion": "JR. JOAQUIN CAPELLO N° 2365, UNIDAD VECINAL MIRONES BAJOS - LIMA - LIMA - LIMA",
+    "telefonos": "-, 999451001",
+    "web": "sicreo.org.pe",
+    "email": "carlosespa1@hotmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Verheye Asalde Yann"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Alcala España Alan Max"
+      }
+    ]
+  },
+  {
+    "numero": "036",
+    "nombre": "PARTIDO UNIDAD Y PAZ",
+    "fecha_inscripcion": "02/10/2024",
+    "direccion": "JR. LARCO HERRERA N° 975 - LIMA - LIMA - MAGDALENA DEL MAR",
+    "telefonos": "-, 998450823",
+    "web": "www.unidadypaz.org.pe",
+    "email": "oscar.arandami17@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Aranda Gonzales Oscar David"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Quevedo Alvarado Walter Adolfo"
+      }
+    ]
+  },
+  {
+    "numero": "037",
+    "nombre": "PERU MODERNO",
+    "fecha_inscripcion": "07/06/2023",
+    "direccion": "JR. CARABAYA N° 420 - LIMA - LIMA - LIMA",
+    "telefonos": ", 963812914",
+    "web": "https://perumoderno.org.pe/perumoderno",
+    "email": "w.aragon@yahoo.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Aragon Ponce Wilson Melecio"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Chileno Ruiz Pedro"
+      }
+    ]
+  },
+  {
+    "numero": "038",
+    "nombre": "PODEMOS PERU",
+    "fecha_inscripcion": "10/01/2018",
+    "direccion": "AV. PASEO COLON N° 323 - LIMA - LIMA - LIMA",
+    "telefonos": ", 912895636",
+    "web": "www.podemosperu.pe",
+    "email": "mery.gonzales01@outlook.es",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Gonzales Enriquez Mery Nataly"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Navarrete Santillan Luis Alejandro"
+      }
+    ]
+  },
+  {
+    "numero": "039",
+    "nombre": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "fecha_inscripcion": "05/07/2023",
+    "direccion": "JR. Tarapacá N° 147-A - LIMA - LIMA - BARRANCO",
+    "telefonos": "-, 950532627",
+    "web": "www.primerolagente.pe",
+    "email": "marcoantoniozevallos@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Zevallos Bueno Marco Antonio"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Mandros Poblet Karl Paul"
+      }
+    ]
+  },
+  {
+    "numero": "040",
+    "nombre": "PROGRESEMOS",
+    "fecha_inscripcion": "03/07/2024",
+    "direccion": "JR. CONTUMAZÁ N° 975,  OFICINA 202 CERCADO DE LIMA - LIMA - LIMA - LIMA",
+    "telefonos": "968270346, 944669309",
+    "web": "www.progresemos.pe",
+    "email": "contacto@progresemos.pe",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Principe Gonzales Carlos Alberto"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Rosales Noel Jose Eduardo"
+      }
+    ]
+  },
+  {
+    "numero": "041",
+    "nombre": "RENOVACION POPULAR",
+    "fecha_inscripcion": "07/12/2004",
+    "direccion": "CALLE COSTA RICA N° 157, URB. LOS PATRICIOS - LIMA - LIMA - JESUS MARIA",
+    "telefonos": "225-5469, 928037519",
+    "web": "renovacionpopular.com.pe",
+    "email": "renovacionpopularperu@gmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Sotelo Montenegro Vicente Martin"
+      }
+    ]
+  },
+  {
+    "numero": "042",
+    "nombre": "SALVEMOS AL PERU",
+    "fecha_inscripcion": "29/05/2023",
+    "direccion": "JR. CAMANA N° 989 - LIMA - LIMA - LIMA",
+    "telefonos": ", 989475078",
+    "web": "www.salvemosalperu.com.pe",
+    "email": "cf_9704@hotmail.com",
+    "personeros": [
+      {
+        "tipo": "Titular",
+        "nombre": "Gamboa Cerna Julio Cesar"
+      },
+      {
+        "tipo": "Alterno",
+        "nombre": "Roldan Castro Edras d"
+      }
+    ]
+  }
+]

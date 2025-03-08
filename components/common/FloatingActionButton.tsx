@@ -5,8 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 interface FloatingActionButtonProps {
   onCommentPress: () => void;
   onVotePress: () => void;
-  onToggle?: (isOpen: boolean) => void; // Nueva prop para notificar al padre
-  isOpen?: boolean; // Prop para controlar el estado desde el padre
+  onToggle?: (isOpen: boolean) => void;
+  isOpen?: boolean;
 }
 
 const { height } = Dimensions.get("window");
@@ -15,14 +15,13 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   onCommentPress,
   onVotePress,
   onToggle,
-  isOpen: isOpenProp = false, // Valor por defecto
+  isOpen: isOpenProp = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(isOpenProp); // Estado interno
+  const [isOpen, setIsOpen] = useState(isOpenProp);
   const scaleAnim = useRef(new Animated.Value(0)).current;
-  const positionAnim1 = useRef(new Animated.Value(0)).current; // Para el botón de comentarios
-  const positionAnim2 = useRef(new Animated.Value(0)).current; // Para el botón de votar
+  const positionAnim1 = useRef(new Animated.Value(0)).current;
+  const positionAnim2 = useRef(new Animated.Value(0)).current;
 
-  // Sincronizar el estado interno con la prop isOpen
   useEffect(() => {
     setIsOpen(isOpenProp);
     toggleMenuAnimations(isOpenProp);
@@ -30,8 +29,8 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
   const toggleMenuAnimations = (shouldOpen: boolean) => {
     const toValue = shouldOpen ? 1 : 0;
-    const position1 = shouldOpen ? -80 : 0; // Ajusta según sea necesario
-    const position2 = shouldOpen ? -160 : 0; // Ajusta según sea necesario
+    const position1 = shouldOpen ? -80 : 0;
+    const position2 = shouldOpen ? -160 : 0;
 
     Animated.parallel([
       Animated.spring(scaleAnim, {
@@ -54,7 +53,6 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     setIsOpen(newIsOpen);
     toggleMenuAnimations(newIsOpen);
 
-    // Notificar al padre sobre el cambio de estado
     if (onToggle) {
       onToggle(newIsOpen);
     }
@@ -92,15 +90,15 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 20,
     alignItems: "center",
-    zIndex: 2, // El FAB y sus opciones están por encima del overlay
+    zIndex: 2,
   },
   option: {
     position: "absolute",
     bottom: 0,
-    right: 0, // Alinear a la derecha
-    flexDirection: "row-reverse", // Texto a la izquierda del ícono
-    alignItems: "center", // Centrar verticalmente
-    width: 160, // Ancho suficiente para el texto y el ícono
+    right: 0,
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    width: 160,
   },
   button: {
     width: 50,

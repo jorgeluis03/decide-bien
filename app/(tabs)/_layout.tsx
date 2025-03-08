@@ -34,13 +34,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="candidatos"
         options={{
           title: 'Candidatos',
@@ -49,18 +42,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="congresistas"
+        name="eleccionesTab"
         options={{
-          title: 'Congresistas',
-          headerShown: true,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.3.fill" color={color} />,
+          title: 'Elecciones',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="checkmark.square" color={color} />,
         }}
       />
       <Tabs.Screen
         name="leyesTab"
         options={{
           title: 'Leyes',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="scales" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.closed" color={color} />,
         }}
       />
     </Tabs>

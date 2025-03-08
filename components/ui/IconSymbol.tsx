@@ -15,7 +15,8 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'person.2.fill': 'people',
   'person.3.fill': 'people',
-  'scales': 'balance',
+  'book.closed': 'balance',
+  'checkmark.square': 'ballot',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
