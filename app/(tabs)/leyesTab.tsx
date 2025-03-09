@@ -11,6 +11,7 @@ import {
   Animated,
   StatusBar,
   Platform,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -19,7 +20,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateFilter from "@/components/screens/DateFilter";
 import LeyItem from "@/components/screens/LeyItem";
-import {BASE_URL} from "@/constants/config";
+import { BASE_URL } from "@/constants/config";
+import EstadoFilter from "@/components/screens/EstadoFilter";
 interface Ley {
   pleyNum: number;
   desEstado: string;
@@ -27,6 +29,13 @@ interface Ley {
   fecPresentacion: string;
   autores: string;
 }
+
+// Estados de prueba (debes traerlos desde la API)
+const estados = [
+  { estadoId: 1, desEstado: "Pendiente" },
+  { estadoId: 2, desEstado: "Aprobado" },
+  { estadoId: 3, desEstado: "En Comisión" },
+];
 
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 const PAGE_SIZE = 10;
@@ -42,6 +51,7 @@ export default function LeyesTab() {
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [estadoSeleccionado, setEstadoSeleccionado] = useState<number | null>(null);
 
   const debouncedQuery = useDebounce(query, 500);
   const fadeAnim = useState(new Animated.Value(0))[0];
@@ -100,7 +110,7 @@ export default function LeyesTab() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}> 
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
       {!showSearch ? (
         <View style={styles.header}>
           <ThemedText style={styles.headerTitle}>Proyectos de Ley</ThemedText>
@@ -125,7 +135,8 @@ export default function LeyesTab() {
           </TouchableOpacity>
         </ThemedView>
       )}
-      
+
+      {/* Filtro por fechas */}
       <DateFilter
         onDateChange={(start, end) => {
           setStartDate(start);
@@ -133,6 +144,10 @@ export default function LeyesTab() {
         }}
       />
 
+      {/* Estados de las leyes */}
+      <EstadoFilter onEstadoChange={(estado) => setEstadoSeleccionado(estado)} />
+
+      {/* Lista de leyes */}
       {loading && leyes.length === 0 ? (
         <ThemedView style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />

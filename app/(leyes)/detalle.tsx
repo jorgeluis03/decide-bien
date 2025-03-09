@@ -9,7 +9,7 @@ import FirmantesLista from "@/components/screens/FirmantesLista";
 import { useRouter } from "expo-router";
 import DescargarPDFButton from "@/components/common/DescargarPDFButton";
 import FloatingActionButton from "@/components/common/FloatingActionButton";
-import {BASE_URL} from "@/constants/config";
+import { BASE_URL } from "@/constants/config";
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 
 interface Firmante {
@@ -18,6 +18,7 @@ interface Firmante {
   dni: string;
   sexo: string;
   pagWeb: string;
+  foto_url: string;
 }
 
 interface Ley {
