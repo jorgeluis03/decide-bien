@@ -6,14 +6,16 @@ interface EstadoFilterProps {
 }
 
 const estados = [
-    { estadoId: 1, desEstado: "Pendiente" },
-    { estadoId: 2, desEstado: "Aprobado" },
-    { estadoId: 3, desEstado: "En Comisión" },
+    { estadoId: 1, desEstado: "PRESENTADO" },
+    { estadoId: 2, desEstado: "APROBADO" },
+    { estadoId: 3, desEstado: "EN COMISIÓN" },
+    { estadoId: 4, desEstado: "AUTÓGRAFA" },
+    { estadoId: 5, desEstado: "EN DEBATE" },
 ];
 
 export default function EstadoFilter({ onEstadoChange }: EstadoFilterProps) {
     const [selectedEstado, setSelectedEstado] = useState<number | null>(null);
-    
+
     const toggleEstado = (estadoId: number) => {
         const newEstado = selectedEstado === estadoId ? null : estadoId;
         setSelectedEstado(newEstado);
@@ -28,7 +30,9 @@ export default function EstadoFilter({ onEstadoChange }: EstadoFilterProps) {
                     style={[styles.estadoButtonContainer, selectedEstado === estado.estadoId && styles.selectedEstado]}
                     onPress={() => toggleEstado(estado.estadoId)}
                 >
-                    <Text style={styles.estadoText}>{estado.desEstado}</Text>
+                    <Text style={[styles.estadoText, selectedEstado === estado.estadoId && styles.selectedEstadoText]}>
+                        {estado.desEstado}
+                    </Text>
                 </TouchableOpacity>
             ))}
         </View>
@@ -39,8 +43,8 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
-        marginVertical: 10,
+        gap: 6,
+        marginVertical: 6,
         paddingHorizontal: 10,
     },
     estadoButtonContainer: {
@@ -58,7 +62,11 @@ const styles = StyleSheet.create({
     selectedEstado: {
         backgroundColor: "#d1e7ff",
     },
+    selectedEstadoText: {
+        fontWeight: "bold",
+        color: "#2E8FFA",
+    },
     estadoText: {
-        fontSize: 14,
+        fontSize: 12,
     },
 });
