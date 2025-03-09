@@ -19,7 +19,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateFilter from "@/components/screens/DateFilter";
 import LeyItem from "@/components/screens/LeyItem";
-
+import {BASE_URL} from "@/constants/config";
 interface Ley {
   pleyNum: number;
   desEstado: string;
@@ -28,7 +28,7 @@ interface Ley {
   autores: string;
 }
 
-const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
+const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 const PAGE_SIZE = 10;
 
 export default function LeyesTab() {

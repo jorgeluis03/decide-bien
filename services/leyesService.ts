@@ -1,4 +1,5 @@
-const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
+import {BASE_URL} from "@/constants/config";
+const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 
 export const fetchLeyes = async (query = "", rowStart = 0, pageSize = 10) => {
     try {

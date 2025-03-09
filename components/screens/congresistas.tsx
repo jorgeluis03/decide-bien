@@ -14,8 +14,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
 import { fetchData } from "../../utils/fetchData";
+import {BASE_URL} from "@/constants/config";
 
-const API_URL = "http://192.168.18.24:8080/api/v1/congresistas";
+const API_URL = `${BASE_URL}/api/v1/congresistas`;
 const PAGE_SIZE = 10;
 
 interface Congresista {

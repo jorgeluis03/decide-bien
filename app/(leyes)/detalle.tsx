@@ -9,8 +9,8 @@ import FirmantesLista from "@/components/screens/FirmantesLista";
 import { useRouter } from "expo-router";
 import DescargarPDFButton from "@/components/common/DescargarPDFButton";
 import FloatingActionButton from "@/components/common/FloatingActionButton";
-
-const API_URL = "http://192.168.18.24:8080/api/v1/leyes/proyectos";
+import {BASE_URL} from "@/constants/config";
+const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 
 interface Firmante {
   firmanteId: number;

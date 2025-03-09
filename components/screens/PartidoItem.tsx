@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-
+import { BASE_URL } from '@/constants/config';
 interface Personero {
     tipo: string;
     nombre: string;
@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function PartidoItem({ partido }: Props) {
-    const proxyUrl = "http://192.168.18.24:8080/api/v1/proxy?url=";
+    const proxyUrl = `${BASE_URL}/api/v1/proxy?url=`;
     const targetUrl = encodeURIComponent(partido.logo);
 
     return (
