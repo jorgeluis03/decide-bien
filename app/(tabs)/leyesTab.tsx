@@ -7,11 +7,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
-  View,
   Animated,
   StatusBar,
   Platform,
-  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -106,12 +104,12 @@ export default function LeyesTab() {
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
       {!showSearch ? (
-        <View style={styles.header}>
+        <ThemedView style={styles.header}>
           <ThemedText style={styles.headerTitle}>Proyectos de Ley</ThemedText>
           <TouchableOpacity onPress={() => setShowSearch(true)}>
             <Ionicons name="search" size={24} color="black" />
           </TouchableOpacity>
-        </View>
+        </ThemedView>
       ) : (
         <ThemedView style={styles.searchBar}>
           <TextInput

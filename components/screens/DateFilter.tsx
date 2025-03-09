@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import {TouchableOpacity, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import { ThemedView } from "../ThemedView";
+import { ThemedText } from "../ThemedText";
 
 interface DateFilterProps {
     onDateChange: (startDate: Date | null, endDate: Date | null) => void;
@@ -45,32 +47,32 @@ export default function DateFilter({ onDateChange }: DateFilterProps) {
     };
 
     return (
-        <View style={styles.container}>
+        <ThemedView style={styles.container}>
             {/* Selector de fecha de inicio */}
-            <View style={styles.dateButtonContainer}>
+            <ThemedView style={styles.dateButtonContainer}>
                 <TouchableOpacity style={styles.dateButton} onPress={() => openPicker("start")}>
                     <Ionicons name="calendar" size={20} color="black" />
-                    <Text style={styles.dateText}>{startDate ? startDate.toLocaleDateString() : "Desde"}</Text>
+                    <ThemedText style={styles.dateText}>{startDate ? startDate.toLocaleDateString() : "Desde"}</ThemedText>
                 </TouchableOpacity>
                 {startDate && (
                     <TouchableOpacity style={styles.clearButton} onPress={() => clearDate("start")}>
                         <Ionicons name="close-circle" size={20} color="gray" />
                     </TouchableOpacity>
                 )}
-            </View>
+            </ThemedView>
 
             {/* Selector de fecha de fin */}
-            <View style={styles.dateButtonContainer}>
+            <ThemedView style={styles.dateButtonContainer}>
                 <TouchableOpacity style={styles.dateButton} onPress={() => openPicker("end")}>
                     <Ionicons name="calendar" size={20} color="black" />
-                    <Text style={styles.dateText}>{endDate ? endDate.toLocaleDateString() : "Hasta"}</Text>
+                    <ThemedText style={styles.dateText}>{endDate ? endDate.toLocaleDateString() : "Hasta"}</ThemedText>
                 </TouchableOpacity>
                 {endDate && (
                     <TouchableOpacity style={styles.clearButton} onPress={() => clearDate("end")}>
                         <Ionicons name="close-circle" size={20} color="gray" />
                     </TouchableOpacity>
                 )}
-            </View>
+            </ThemedView>
 
             {showPicker && (
                 <DateTimePicker
@@ -80,7 +82,7 @@ export default function DateFilter({ onDateChange }: DateFilterProps) {
                     onChange={handleDateChange}
                 />
             )}
-        </View>
+        </ThemedView>
     );
 }
 

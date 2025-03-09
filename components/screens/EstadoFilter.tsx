@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { ThemedView } from "../ThemedView";
+import { ThemedText } from "../ThemedText";
 
 interface EstadoFilterProps {
     onEstadoChange: (selectedEstado: number | null) => void;
@@ -86,7 +88,7 @@ export default function EstadoFilter({ onEstadoChange }: EstadoFilterProps) {
     };
 
     return (
-        <View style={styles.container}>
+        <ThemedView style={styles.container}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 {estados.map((estado) => (
                     <TouchableOpacity
@@ -94,13 +96,13 @@ export default function EstadoFilter({ onEstadoChange }: EstadoFilterProps) {
                         style={[styles.estadoButtonContainer, selectedEstado === estado.estadoId && styles.selectedEstado]}
                         onPress={() => toggleEstado(estado.estadoId)}
                     >
-                        <Text style={[styles.estadoText, selectedEstado === estado.estadoId && styles.selectedEstadoText]}>
+                        <ThemedText style={[styles.estadoText, selectedEstado === estado.estadoId && styles.selectedEstadoText]}>
                             {estado.desEstado}
-                        </Text>
+                        </ThemedText>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
-        </View>
+        </ThemedView>
     );
 }
 
