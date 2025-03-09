@@ -11,6 +11,7 @@ interface Personero {
 
 interface Partido {
     numero: string;
+    logo: string;
     nombre: string;
     fecha_inscripcion: string;
     direccion: string;

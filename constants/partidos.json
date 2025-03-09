@@ -1,11 +1,12 @@
 [
   {
     "numero": "001",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/4",
     "nombre": "ACCION POPULAR",
     "fecha_inscripcion": "04/08/2004",
     "direccion": "AV. 9 DE DICIEMBRE (EX PASEO COLON) N° 218 - LIMA - LIMA - LIMA",
     "telefonos": "3321965, 999891300",
-    "web": "accionpopular.com.pe/",
+    "web": "https://accionpopular.com.pe/",
     "email": "fariasstella@gmail.com",
     "personeros": [
       {
@@ -16,11 +17,12 @@
   },
   {
     "numero": "002",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2980",
     "nombre": "AHORA NACION - AN",
     "fecha_inscripcion": "24/07/2024",
     "direccion": "JR. ISIDRO ALCIBAR N° 142, URB. INGENIERÍA - LIMA - LIMA - SAN MARTIN DE PORRES",
     "telefonos": "-, 942782097",
-    "web": "ahoranacion.org.pe",
+    "web": "https://ahoranacion.org.pe",
     "email": "ahoranacion@gmail.com",
     "personeros": [
       {
@@ -35,11 +37,12 @@
   },
   {
     "numero": "003",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2934",
     "nombre": "ALIANZA NACIONAL DE TRABAJADORES AGRICULTORES UNIVERSITARIOS RESERVISTAS Y OBREROS",
     "fecha_inscripcion": "12/12/2023",
     "direccion": "JR. Barbara Alcázar N° 172, URB. Pando - LIMA - LIMA - SAN MIGUEL",
     "telefonos": "-, 965084050",
-    "web": "www.alianzanacional.pe",
+    "web": "https://www.alianzanacional.pe",
     "email": "exica3@hotmail.com",
     "personeros": [
       {
@@ -54,11 +57,12 @@
   },
   {
     "numero": "004",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/1257",
     "nombre": "ALIANZA PARA EL PROGRESO",
     "fecha_inscripcion": "12/02/2008",
     "direccion": "AV. DE LA POLICIA N° 643 - LIMA - LIMA - JESUS MARIA",
     "telefonos": "2024600, 991156135",
-    "web": "www.app.pe",
+    "web": "https://www.app.pe",
     "email": "personerolegal@app.pe",
     "personeros": [
       {
@@ -73,11 +77,12 @@
   },
   {
     "numero": "005",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2173",
     "nombre": "AVANZA PAIS - PARTIDO DE INTEGRACION SOCIAL",
     "fecha_inscripcion": "10/05/2017",
     "direccion": "JR. LOS JAZMINES N° 411 - LIMA - LIMA - LINCE",
     "telefonos": "951587488, 951587488",
-    "web": "www.avanzapaisperu.com",
+    "web": "https://www.avanzapaisperu.com",
     "email": "aldo.borrero.rojas@gmail.com",
     "personeros": [
       {
@@ -92,11 +97,12 @@
   },
   {
     "numero": "006",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2984",
     "nombre": "BATALLA PERU",
     "fecha_inscripcion": "31/01/2025",
     "direccion": "JR. RUFINO TORRICO N° 1079 - LIMA - LIMA - LIMA",
     "telefonos": "-, 920628207",
-    "web": "www.batallaperu.pe",
+    "web": "https://www.batallaperu.pe",
     "email": "partidopoliticobatallaperu@gmail.com",
     "personeros": [
       {
@@ -111,11 +117,12 @@
   },
   {
     "numero": "007",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2898",
     "nombre": "FE EN EL PERU",
     "fecha_inscripcion": "14/02/2023",
     "direccion": "CALLE LOS MAGISTRADOS N° 119, URB. LOS MAGISTRADOS - LIMA - LIMA - LA MOLINA",
     "telefonos": "-, 924821634",
-    "web": "www.feenelperu.pe",
+    "web": "https://www.feenelperu.pe",
     "email": "administracion@feenelperu.pe",
     "personeros": [
       {
@@ -130,11 +137,12 @@
   },
   {
     "numero": "008",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2901",
     "nombre": "FRENTE POPULAR AGRICOLA FIA DEL PERU",
     "fecha_inscripcion": "14/02/2023",
     "direccion": "JR. LAMPA N° 1048 - 1050 - LIMA - LIMA - LIMA",
     "telefonos": "2753967, 952519868",
-    "web": "www.frepap.org.pe",
+    "web": "https://www.frepap.org.pe",
     "email": "caluceh@gmail.com",
     "personeros": [
       {
@@ -149,11 +157,12 @@
   },
   {
     "numero": "009",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/1366",
     "nombre": "FUERZA POPULAR",
     "fecha_inscripcion": "09/03/2010",
     "direccion": "PARQUE HERNAN VELARDE N° 038, URB. SANTA BEATRIZ - LIMA - LIMA - LIMA",
     "telefonos": "956020838, 966874944",
-    "web": "https://fuerzapopular.com.pe/",
+    "web": "https://https://fuerzapopular.com.pe/",
     "email": "personeriafp@gmail.com",
     "personeros": [
       {
@@ -168,11 +177,12 @@
   },
   {
     "numero": "010",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/1264",
     "nombre": "JUNTOS POR EL PERU",
     "fecha_inscripcion": "23/11/2009",
     "direccion": "JR. TARMA N° 361 - LIMA - LIMA - LIMA",
     "telefonos": ", 957583207",
-    "web": "www.jp.org.pe",
+    "web": "https://www.jp.org.pe",
     "email": "personero.jp@gmail.com",
     "personeros": [
       {
@@ -187,11 +197,12 @@
   },
   {
     "numero": "011",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2933",
     "nombre": "LIBERTAD POPULAR",
     "fecha_inscripcion": "08/06/2023",
     "direccion": "AV. LOS INCAS N° 172, - LIMA - LIMA - SAN ISIDRO",
     "telefonos": "-, 996608100",
-    "web": "www.libertadpopular.org.pe",
+    "web": "https://www.libertadpopular.org.pe",
     "email": "partido.libertad.popular@gmail.com",
     "personeros": [
       {
@@ -206,11 +217,12 @@
   },
   {
     "numero": "012",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2946",
     "nombre": "NUEVO PERU POR EL BUEN VIVIR",
     "fecha_inscripcion": "03/07/2024",
     "direccion": "PLAZA BOLOGNESI N° 590 - LIMA - LIMA - BREÑA",
     "telefonos": ", 948499814",
-    "web": "https://nuevoperu.pe",
+    "web": "https://https://nuevoperu.pe",
     "email": "secretariageneral@nuevoperu.pe",
     "personeros": [
       {
@@ -225,11 +237,12 @@
   },
   {
     "numero": "013",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2930",
     "nombre": "PARTIDO APRISTA PERUANO",
     "fecha_inscripcion": "24/03/2023",
     "direccion": "AV. Alfonso Ugarte N° 1012 - LIMA - LIMA - BREÑA",
     "telefonos": "-, 969136165",
-    "web": "www.apraoficial.com",
+    "web": "https://www.apraoficial.com",
     "email": "msj37@hotmail.com",
     "personeros": [
       {
@@ -244,11 +257,12 @@
   },
   {
     "numero": "014",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2968",
     "nombre": "PARTIDO CIUDADANOS POR EL PERU",
     "fecha_inscripcion": "17/01/2025",
     "direccion": "SECTOR HEROES DEL CENEPA Mz. F Lote 1,  VIRGEN DE LOURDES - NUEVA ESPERANZA - LIMA - LIMA - VILLA MARIA DEL TRIUNFO",
     "telefonos": "900953307, 975094556",
-    "web": "ciudadanosporelperu.com",
+    "web": "https://ciudadanosporelperu.com",
     "email": "eduarte3035@gmail.com",
     "personeros": [
       {
@@ -263,11 +277,12 @@
   },
   {
     "numero": "015",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2941",
     "nombre": "PARTIDO CIVICO OBRAS",
     "fecha_inscripcion": "15/07/2024",
     "direccion": "JR. DE LA UNIÓN N° 1087 Dpto. 203 Int. A - LIMA - LIMA - LIMA",
     "telefonos": "-, 985401735",
-    "web": "https://partidopoliticocivicoobras.com/",
+    "web": "https://https://partidopoliticocivicoobras.com/",
     "email": "lolofernandezespinoza@gmail.com",
     "personeros": [
       {
@@ -282,11 +297,12 @@
   },
   {
     "numero": "016",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2939",
     "nombre": "PARTIDO DE LOS TRABAJADORES Y EMPRENDEDORES PTE - PERU",
     "fecha_inscripcion": "05/04/2024",
     "direccion": "JR. SANTA ROSA N° 360 - LIMA - LIMA - LIMA",
     "telefonos": ", 975081227",
-    "web": "www.pte.pe",
+    "web": "https://www.pte.pe",
     "email": "contactonacional@pte.pe",
     "personeros": [
       {
@@ -301,11 +317,12 @@
   },
   {
     "numero": "017",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2961",
     "nombre": "PARTIDO DEL BUEN GOBIERNO",
     "fecha_inscripcion": "02/08/2024",
     "direccion": "AV. 9 DE DICEMBRE (EX PASEO COLÓN) N° 301,  CERCADO DE LIMA - LIMA - LIMA - LIMA",
     "telefonos": "-, 996174416",
-    "web": "www.partidodelbuengobierno.pe",
+    "web": "https://www.partidodelbuengobierno.pe",
     "email": "jonimon@yahoo.com",
     "personeros": [
       {
@@ -320,11 +337,12 @@
   },
   {
     "numero": "018",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2867",
     "nombre": "PARTIDO DEMOCRATA UNIDO PERU",
     "fecha_inscripcion": "13/03/2023",
     "direccion": "JR. CARABAYA N° 1159 Dpto. 810 - LIMA - LIMA - LIMA",
     "telefonos": "953 564 557, 993672655",
-    "web": "https://partidodemocrataunidoperu.com/",
+    "web": "https://https://partidodemocrataunidoperu.com/",
     "email": "charliecarrascosalazar1@gmail.com",
     "personeros": [
       {
@@ -339,11 +357,12 @@
   },
   {
     "numero": "019",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2895",
     "nombre": "PARTIDO DEMOCRATA VERDE",
     "fecha_inscripcion": "14/02/2023",
     "direccion": "CALLE MANUEL ARRISUEÑO N° 683 Int. 302, URB. SANTA CATALINA - LIMA - LIMA - LA VICTORIA",
     "telefonos": "-, 942476667",
-    "web": "http://www.democrataverde.com/",
+    "web": "https://http://www.democrataverde.com/",
     "email": "pdemocrataverde@gmail.com",
     "personeros": [
       {
@@ -358,11 +377,12 @@
   },
   {
     "numero": "020",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2986",
     "nombre": "PARTIDO DEMOCRATICO FEDERAL",
     "fecha_inscripcion": "21/01/2025",
     "direccion": "AV. LAS ARTES SUR N° 665 - LIMA - LIMA - SAN BORJA",
     "telefonos": "-, 947037627",
-    "web": "democraticofederal.com",
+    "web": "https://democraticofederal.com",
     "email": "w.gamonal@udl.edu.pe",
     "personeros": [
       {
@@ -377,11 +397,12 @@
   },
   {
     "numero": "021",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/14",
     "nombre": "PARTIDO DEMOCRATICO SOMOS PERU",
     "fecha_inscripcion": "22/11/2004",
     "direccion": "JR. TORRE DE LA MERCED N° 165-167, URB. SANTA CATALINA - LIMA - LIMA - LA VICTORIA",
     "telefonos": "373 2581, 997299382",
-    "web": "www.somosperu.pe",
+    "web": "https://www.somosperu.pe",
     "email": "partidosomosperu@outlook.com",
     "personeros": [
       {
@@ -392,11 +413,12 @@
   },
   {
     "numero": "022",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2857",
     "nombre": "PARTIDO FRENTE DE LA ESPERANZA 2021",
     "fecha_inscripcion": "16/09/2021",
     "direccion": "JR. Bolognesi N° 775 Dpto. Edificio H, Dpto. 203, referencia: Plaza Sechin - LIMA - LIMA - SAN MIGUEL",
     "telefonos": "936371219, 995172602",
-    "web": "www.partidofrentedelaesperanza2021.pe",
+    "web": "https://www.partidofrentedelaesperanza2021.pe",
     "email": "frenteesperanza.fe@gmail.com",
     "personeros": [
       {
@@ -411,11 +433,12 @@
   },
   {
     "numero": "023",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2840",
     "nombre": "PARTIDO MORADO",
     "fecha_inscripcion": "01/03/2019",
     "direccion": "CALLE IGNACIO MERINO N° 375 - LIMA - LIMA - MIRAFLORES",
     "telefonos": "No consigna, 965942063",
-    "web": "www.partidomorado.pe",
+    "web": "https://www.partidomorado.pe",
     "email": "mauriciopalomino.pm@gmail.com",
     "personeros": [
       {
@@ -426,11 +449,12 @@
   },
   {
     "numero": "024",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2956",
     "nombre": "PARTIDO PAIS PARA TODOS",
     "fecha_inscripcion": "02/08/2024",
     "direccion": "CALLE ROMA N° 314 - LIMA - LIMA - SAN ISIDRO",
     "telefonos": "-, 996976287",
-    "web": "www.partidopaisparatodos.org.pe",
+    "web": "https://www.partidopaisparatodos.org.pe",
     "email": "william2966@hotmail.com",
     "personeros": [
       {
@@ -445,11 +469,12 @@
   },
   {
     "numero": "025",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2869",
     "nombre": "PARTIDO PATRIOTICO DEL PERU",
     "fecha_inscripcion": "29/03/2022",
     "direccion": "CALLE LA LADERA Mz. T Lote 5, URB. SIRIUS II ETAPA - LIMA - LIMA - LA MOLINA",
     "telefonos": "3659010, 999097912",
-    "web": "https://partidopatrioticodelperu.org/",
+    "web": "https://https://partidopatrioticodelperu.org/",
     "email": "partidopatrioticodelperu.ppp@gmail.com",
     "personeros": [
       {
@@ -464,11 +489,12 @@
   },
   {
     "numero": "026",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2995",
     "nombre": "PARTIDO POLITICO COOPERACION POPULAR",
     "fecha_inscripcion": "25/11/2024",
     "direccion": "JR. SAN JUDAS TADEO N° 126, URB. SAN JUAN BAUTISTA - LIMA - LIMA - COMAS",
     "telefonos": "-, 984449675",
-    "web": "www.cooperacionpopular.com",
+    "web": "https://www.cooperacionpopular.com",
     "email": "partidocooperacionpopular@gmail.com",
     "personeros": [
       {
@@ -483,11 +509,12 @@
   },
   {
     "numero": "027",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2957",
     "nombre": "PARTIDO POLITICO FUERZA MODERNA",
     "fecha_inscripcion": "07/08/2024",
     "direccion": "AV. 09 DE DICIEMBRE N° 307-309, OTROS CERCADO DE LIMA - LIMA - LIMA - LIMA",
     "telefonos": "-, 996200115",
-    "web": "fuerzamoderna.org.pe",
+    "web": "https://fuerzamoderna.org.pe",
     "email": "aviera@fuerzamoderna.org.pe",
     "personeros": [
       {
@@ -502,11 +529,12 @@
   },
   {
     "numero": "028",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2218",
     "nombre": "PARTIDO POLITICO NACIONAL PERU LIBRE",
     "fecha_inscripcion": "15/01/2016",
     "direccion": "AV. BRASIL N° 170 Dpto. 3er piso - LIMA - LIMA - BREÑA",
     "telefonos": "980839345, 964687880",
-    "web": "https://perulibre.pe/",
+    "web": "https://https://perulibre.pe/",
     "email": "acordova.asesor@gmail.com",
     "personeros": [
       {
@@ -521,11 +549,12 @@
   },
   {
     "numero": "029",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2932",
     "nombre": "PARTIDO POLITICO PERU ACCION",
     "fecha_inscripcion": "25/07/2023",
     "direccion": "AV. Camino Real N° 111 Dpto. 501, referencia: Torre A - LIMA - LIMA - SAN ISIDRO",
     "telefonos": "-, 958494275",
-    "web": "www.peruaccion.pe",
+    "web": "https://www.peruaccion.pe",
     "email": "sliz_3108@hotmail.com",
     "personeros": [
       {
@@ -540,11 +569,12 @@
   },
   {
     "numero": "030",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2925",
     "nombre": "PARTIDO POLITICO PERU PRIMERO",
     "fecha_inscripcion": "19/06/2023",
     "direccion": "CALLE CHACARILLA N° 430 - LIMA - LIMA - SAN ISIDRO",
     "telefonos": "7606496, 970182261",
-    "web": "peruprimero.pe",
+    "web": "https://peruprimero.pe",
     "email": "comunicaciones@peruprimero.pe",
     "personeros": [
       {
@@ -555,11 +585,12 @@
   },
   {
     "numero": "031",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2990",
     "nombre": "PARTIDO POLITICO PERUANOS UNIDOS : ¡SOMOS LIBRES!",
     "fecha_inscripcion": "20/11/2024",
     "direccion": "AV. JAVIER PRADO ESTE N° 560,  OFICINA N° 1403 - LIMA - LIMA - SAN ISIDRO",
     "telefonos": "996284078, 966137724",
-    "web": "www.peruanosunidossomoslibres.com",
+    "web": "https://www.peruanosunidossomoslibres.com",
     "email": "renato.galvez.barbieri@gmail.com",
     "personeros": [
       {
@@ -574,11 +605,12 @@
   },
   {
     "numero": "032",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2937",
     "nombre": "PARTIDO POLITICO POPULAR VOCES DEL PUEBLO",
     "fecha_inscripcion": "23/10/2024",
     "direccion": "Mz. 55 Lote 01, AAHH HUÁSCAR GRUPO 6 SECTOR A - LIMA - LIMA - SAN JUAN DE LURIGANCHO",
     "telefonos": "-, 961746091",
-    "web": "vocesdelpueblo.pe",
+    "web": "https://vocesdelpueblo.pe",
     "email": "jvelazcopalomino@gmail.com",
     "personeros": [
       {
@@ -593,11 +625,12 @@
   },
   {
     "numero": "033",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2921",
     "nombre": "PARTIDO POLITICO PRIN",
     "fecha_inscripcion": "19/01/2023",
     "direccion": "AV. Argentina N° 2530 - LIMA - LIMA - LIMA",
     "telefonos": ", 994025398",
-    "web": "http://prin.org.pe",
+    "web": "https://http://prin.org.pe",
     "email": "personeralegalprin@gmail.com",
     "personeros": [
       {
@@ -608,11 +641,12 @@
   },
   {
     "numero": "034",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2943",
     "nombre": "PARTIDO POPULAR CRISTIANO - PPC",
     "fecha_inscripcion": "10/05/2024",
     "direccion": "AV. ALFONSO UGARTE N° 1484 - LIMA - LIMA - BREÑA",
     "telefonos": "2266470, 999043994",
-    "web": "www.ppcperu.pe",
+    "web": "https://www.ppcperu.pe",
     "email": "lflores@lfnabogados.com.pe",
     "personeros": [
       {
@@ -627,11 +661,12 @@
   },
   {
     "numero": "035",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2935",
     "nombre": "PARTIDO SICREO",
     "fecha_inscripcion": "18/03/2024",
     "direccion": "JR. JOAQUIN CAPELLO N° 2365, UNIDAD VECINAL MIRONES BAJOS - LIMA - LIMA - LIMA",
     "telefonos": "-, 999451001",
-    "web": "sicreo.org.pe",
+    "web": "https://sicreo.org.pe",
     "email": "carlosespa1@hotmail.com",
     "personeros": [
       {
@@ -646,11 +681,12 @@
   },
   {
     "numero": "036",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2944",
     "nombre": "PARTIDO UNIDAD Y PAZ",
     "fecha_inscripcion": "02/10/2024",
     "direccion": "JR. LARCO HERRERA N° 975 - LIMA - LIMA - MAGDALENA DEL MAR",
     "telefonos": "-, 998450823",
-    "web": "www.unidadypaz.org.pe",
+    "web": "https://www.unidadypaz.org.pe",
     "email": "oscar.arandami17@gmail.com",
     "personeros": [
       {
@@ -665,11 +701,12 @@
   },
   {
     "numero": "037",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2924",
     "nombre": "PERU MODERNO",
     "fecha_inscripcion": "07/06/2023",
     "direccion": "JR. CARABAYA N° 420 - LIMA - LIMA - LIMA",
     "telefonos": ", 963812914",
-    "web": "https://perumoderno.org.pe/perumoderno",
+    "web": "https://https://perumoderno.org.pe/perumoderno",
     "email": "w.aragon@yahoo.com",
     "personeros": [
       {
@@ -684,11 +721,12 @@
   },
   {
     "numero": "038",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2731",
     "nombre": "PODEMOS PERU",
     "fecha_inscripcion": "10/01/2018",
     "direccion": "AV. PASEO COLON N° 323 - LIMA - LIMA - LIMA",
     "telefonos": ", 912895636",
-    "web": "www.podemosperu.pe",
+    "web": "https://www.podemosperu.pe",
     "email": "mery.gonzales01@outlook.es",
     "personeros": [
       {
@@ -703,11 +741,12 @@
   },
   {
     "numero": "039",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2931",
     "nombre": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
     "fecha_inscripcion": "05/07/2023",
     "direccion": "JR. Tarapacá N° 147-A - LIMA - LIMA - BARRANCO",
     "telefonos": "-, 950532627",
-    "web": "www.primerolagente.pe",
+    "web": "https://www.primerolagente.pe",
     "email": "marcoantoniozevallos@gmail.com",
     "personeros": [
       {
@@ -722,11 +761,12 @@
   },
   {
     "numero": "040",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2967",
     "nombre": "PROGRESEMOS",
     "fecha_inscripcion": "03/07/2024",
     "direccion": "JR. CONTUMAZÁ N° 975,  OFICINA 202 CERCADO DE LIMA - LIMA - LIMA - LIMA",
     "telefonos": "968270346, 944669309",
-    "web": "www.progresemos.pe",
+    "web": "https://www.progresemos.pe",
     "email": "contacto@progresemos.pe",
     "personeros": [
       {
@@ -741,11 +781,12 @@
   },
   {
     "numero": "041",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/22",
     "nombre": "RENOVACION POPULAR",
     "fecha_inscripcion": "07/12/2004",
     "direccion": "CALLE COSTA RICA N° 157, URB. LOS PATRICIOS - LIMA - LIMA - JESUS MARIA",
     "telefonos": "225-5469, 928037519",
-    "web": "renovacionpopular.com.pe",
+    "web": "https://renovacionpopular.com.pe",
     "email": "renovacionpopularperu@gmail.com",
     "personeros": [
       {
@@ -756,11 +797,12 @@
   },
   {
     "numero": "042",
+    "logo": "https://sroppublico.jne.gob.pe/Consulta/Simbolo/GetSimbolo/2927",
     "nombre": "SALVEMOS AL PERU",
     "fecha_inscripcion": "29/05/2023",
     "direccion": "JR. CAMANA N° 989 - LIMA - LIMA - LIMA",
     "telefonos": ", 989475078",
-    "web": "www.salvemosalperu.com.pe",
+    "web": "https://www.salvemosalperu.com.pe",
     "email": "cf_9704@hotmail.com",
     "personeros": [
       {
