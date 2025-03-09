@@ -30,13 +30,6 @@ interface Ley {
   autores: string;
 }
 
-// Estados de prueba (debes traerlos desde la API)
-const estados = [
-  { estadoId: 1, desEstado: "Pendiente" },
-  { estadoId: 2, desEstado: "Aprobado" },
-  { estadoId: 3, desEstado: "En Comisión" },
-];
-
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 const PAGE_SIZE = 10;
 
@@ -51,7 +44,7 @@ export default function LeyesTab() {
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [estadoSeleccionado, setEstadoSeleccionado] = useState<number | null>(null);
+  const [estadoSeleccionado, setEstadoSeleccionado] = useState<number | null>(1);
 
   const debouncedQuery = useDebounce(query, 500);
   const fadeAnim = useState(new Animated.Value(0))[0];
@@ -73,6 +66,7 @@ export default function LeyesTab() {
         perParId: 2021,
         fecPresentacionDesde: startDate ? startDate.toISOString().split("T")[0] : null,
         fecPresentacionHasta: endDate ? endDate.toISOString().split("T")[0] : null,
+        estadoId: estadoSeleccionado || null,
       };
 
       const data = await fetchData<{ data: { proyectos: Ley[]; rowsTotal: number } }>(API_URL, "POST", undefined, body);
@@ -93,7 +87,7 @@ export default function LeyesTab() {
 
   useEffect(() => {
     fetchLeyes(true);
-  }, [debouncedQuery, startDate, endDate]);
+  }, [debouncedQuery, startDate, endDate, estadoSeleccionado]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {

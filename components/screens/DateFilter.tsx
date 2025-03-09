@@ -29,7 +29,7 @@ export default function DateFilter({ onDateChange }: DateFilterProps) {
 
     useEffect(() => {
         onDateChange(startDate, endDate);
-    }, [startDate, endDate, onDateChange]); // Llama a onDateChange cuando startDate o endDate cambian
+    }, [startDate, endDate, onDateChange]);
 
     const openPicker = (picker: "start" | "end") => {
         setCurrentPicker(picker);
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#f0f0f0",
         paddingHorizontal: 12,
-        paddingVertical: 8,
+        paddingVertical: 6,
         borderRadius: 8,
         shadowColor: "#000",
         shadowOffset: { width: 1, height: 2 },
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     },
     dateText: {
         marginLeft: 8,
-        fontSize: 16,
+        fontSize: 14,
     },
     clearButton: {
         marginLeft: 2,
