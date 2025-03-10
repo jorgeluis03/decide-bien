@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import DescargarPDFButton from "@/components/common/DescargarPDFButton";
 import FloatingActionButton from "@/components/common/FloatingActionButton";
 import { BASE_URL } from "@/constants/config";
+import { useQuery } from "@tanstack/react-query";
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 
 interface Firmante {
@@ -31,36 +32,30 @@ interface Ley {
   firmantes: Firmante[];
 }
 
+const fetchLeyDetails = async (id: string) => {
+  const data = await fetchData<{ code: number; data?: { general: any; firmantes: Firmante[], seguimientos: any } }>(`${API_URL}/${id}`);
+  if (data.code === 200 && data.data) {
+    return { ley: { ...data.data.general, firmantes: data.data.firmantes }, seguimientos: data.data.seguimientos };
+  } else {
+    throw new Error("No se encontraron detalles para esta ley.");
+  }
+};
+
 export default function DetalleLeyScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [ley, setLey] = useState<Ley | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [seguimientos, setSeguimientos] = useState<any[]>([]);
   const [isFabOpen, setIsFabOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchLeyDetails = async () => {
-      try {
-        const data = await fetchData<{ code: number; data?: { general: any; firmantes: Firmante[], seguimientos: any } }>(`${API_URL}/${id}`);
-        if (data.code === 200 && data.data) {
-          setLey({ ...data.data.general, firmantes: data.data.firmantes });
-          setSeguimientos(data.data.seguimientos);
-        } else {
-          setError("No se encontraron detalles para esta ley.");
-        }
-      } catch (err) {
-        setError("Error al cargar los detalles de la ley.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  /* CACHÉ */
+  const { data, isLoading, isError, error } = useQuery<{ ley: Ley; seguimientos: any[] }>({
+    queryKey: ["ley", id],
+    queryFn: () => fetchLeyDetails(id!),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 30,
+    retry: 2,
+  });
 
-    if (id) fetchLeyDetails();
-  }, [id]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#007AFF" />
@@ -68,14 +63,16 @@ export default function DetalleLeyScreen() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorText}>{(error as Error).message}</Text>
       </View>
     );
   }
 
+  const ley = data?.ley;
+  const seguimientos = data?.seguimientos;
   const seguimientoPresentado = seguimientos?.find(s => s.desEstado === "PRESENTADO");
   const proyectoArchivoId = seguimientoPresentado?.archivos?.[0]?.proyectoArchivoId;
 
