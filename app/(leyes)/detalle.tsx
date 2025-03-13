@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, ActivityIndicator, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, TouchableOpacity } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet, ScrollView, SafeAreaView, Platform, StatusBar, TouchableOpacity, Button, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fetchData } from "../../utils/fetchData";
 import { ThemedText } from "@/components/ThemedText";
@@ -12,6 +12,7 @@ import FloatingActionButton from "@/components/common/FloatingActionButton";
 import { BASE_URL } from "@/constants/config";
 import { useQuery } from "@tanstack/react-query";
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
+import { getUsers, addUser, deleteUser } from "../../services/firestoreService";
 
 interface Firmante {
   firmanteId: number;
@@ -32,6 +33,12 @@ interface Ley {
   firmantes: Firmante[];
 }
 
+interface User {
+  id: string;
+  name: string;
+  age: number;
+}
+
 const fetchLeyDetails = async (id: string) => {
   const data = await fetchData<{ code: number; data?: { general: any; firmantes: Firmante[], seguimientos: any } }>(`${API_URL}/${id}`);
   if (data.code === 200 && data.data) {
@@ -45,7 +52,17 @@ export default function DetalleLeyScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isFabOpen, setIsFabOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
 
+  // 🔹 Cargar usuarios al montar la vista
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const data = await getUsers();
+      setUsers(data.map(user => ({ ...user, id: user.id ?? "" })));
+    };
+    fetchUsers();
+  }, []);
+  
   /* CACHÉ */
   const { data, isLoading, isError, error } = useQuery<{ ley: Ley; seguimientos: any[] }>({
     queryKey: ["ley", id],
@@ -75,6 +92,20 @@ export default function DetalleLeyScreen() {
   const seguimientos = data?.seguimientos;
   const seguimientoPresentado = seguimientos?.find(s => s.desEstado === "PRESENTADO");
   const proyectoArchivoId = seguimientoPresentado?.archivos?.[0]?.proyectoArchivoId;
+
+  // 🔹 Agregar usuario de prueba
+  const handleAddUser = async () => {
+    await addUser({ name: "Nuevo Usuario", age: 25 });
+    const data = await getUsers();
+    setUsers(data);
+  };
+
+  // 🔹 Eliminar usuario
+  const handleDeleteUser = async (id: string) => {
+    await deleteUser(id);
+    const data = await getUsers();
+    setUsers(data);
+  };
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
@@ -120,6 +151,20 @@ export default function DetalleLeyScreen() {
 
         {/* Firmantes */}
         {ley?.firmantes && <FirmantesLista firmantes={ley.firmantes} />}
+
+        <View>
+          <Button title="Agregar Usuario" onPress={handleAddUser} />
+          <FlatList
+            data={users}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View>
+                <Text>{item.name} - {item.age} años</Text>
+                <Button title="Eliminar" onPress={() => handleDeleteUser(item.id)} />
+              </View>
+            )}
+          />
+        </View>
       </ScrollView>
 
       {/* Boton flotante */}
