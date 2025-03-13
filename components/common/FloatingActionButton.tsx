@@ -62,7 +62,6 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     <View style={styles.container}>
       {/* Botón de Comentarios */}
       <Animated.View style={[styles.option, { transform: [{ translateY: positionAnim1 }, { scale: scaleAnim }], zIndex: 3 }]}>
-        <Text style={styles.optionText}>Comentarios</Text>
         <TouchableOpacity style={styles.button} onPress={onCommentPress}>
           <Ionicons name="chatbubble" size={24} color="white" />
         </TouchableOpacity>
@@ -70,7 +69,6 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
       {/* Botón de Votar */}
       <Animated.View style={[styles.option, { transform: [{ translateY: positionAnim2 }, { scale: scaleAnim }], zIndex: 3 }]}>
-        <Text style={styles.optionText}>Votar</Text>
         <TouchableOpacity style={styles.button} onPress={onVotePress}>
           <Ionicons name="thumbs-up" size={24} color="white" />
         </TouchableOpacity>
@@ -98,7 +96,6 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: "row-reverse",
     alignItems: "center",
-    width: 160,
   },
   button: {
     width: 50,
