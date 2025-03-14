@@ -17,6 +17,15 @@ export default function LeyesLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen name="votarLey"
+          options={{
+            title: 'Votar Ley',
+            headerTitleStyle: {
+              fontWeight: 'medium',
+            },
+            headerShown: false,
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

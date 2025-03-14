@@ -1,31 +1,27 @@
-import React, { useState, useRef, useEffect } from "react";
-import { View, TouchableOpacity, Animated, StyleSheet, Dimensions, Text } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, TouchableOpacity, Animated, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface FloatingActionButtonProps {
   onCommentPress: () => void;
   onVotePress: () => void;
-  onToggle?: (isOpen: boolean) => void;
-  isOpen?: boolean;
+  onToggle: (isOpen: boolean) => void;
+  isOpen: boolean;
 }
-
-const { height } = Dimensions.get("window");
 
 const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   onCommentPress,
   onVotePress,
   onToggle,
-  isOpen: isOpenProp = false,
+  isOpen,
 }) => {
-  const [isOpen, setIsOpen] = useState(isOpenProp);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const positionAnim1 = useRef(new Animated.Value(0)).current;
   const positionAnim2 = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    setIsOpen(isOpenProp);
-    toggleMenuAnimations(isOpenProp);
-  }, [isOpenProp]);
+    toggleMenuAnimations(isOpen);
+  }, [isOpen]);
 
   const toggleMenuAnimations = (shouldOpen: boolean) => {
     const toValue = shouldOpen ? 1 : 0;
@@ -33,29 +29,22 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     const position2 = shouldOpen ? -160 : 0;
 
     Animated.parallel([
-      Animated.spring(scaleAnim, {
+      Animated.timing(scaleAnim, {
         toValue,
+        duration: 200,
         useNativeDriver: true,
       }),
-      Animated.spring(positionAnim1, {
+      Animated.timing(positionAnim1, {
         toValue: position1,
+        duration: 200,
         useNativeDriver: true,
       }),
-      Animated.spring(positionAnim2, {
+      Animated.timing(positionAnim2, {
         toValue: position2,
+        duration: 200,
         useNativeDriver: true,
       }),
     ]).start();
-  };
-
-  const toggleMenu = () => {
-    const newIsOpen = !isOpen;
-    setIsOpen(newIsOpen);
-    toggleMenuAnimations(newIsOpen);
-
-    if (onToggle) {
-      onToggle(newIsOpen);
-    }
   };
 
   return (
@@ -75,7 +64,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
       </Animated.View>
 
       {/* Botón Principal */}
-      <TouchableOpacity style={[styles.mainButton, { zIndex: 3 }]} onPress={toggleMenu}>
+      <TouchableOpacity style={[styles.mainButton, { zIndex: 3 }]} onPress={() => onToggle(!isOpen)}>
         <Ionicons name={isOpen ? "close" : "add"} size={28} color="white" />
       </TouchableOpacity>
     </View>
@@ -92,10 +81,6 @@ const styles = StyleSheet.create({
   },
   option: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    flexDirection: "row-reverse",
-    alignItems: "center",
   },
   button: {
     width: 50,
@@ -105,9 +90,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
     elevation: 5,
     marginRight: 10,
   },
@@ -119,15 +101,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
     elevation: 5,
-  },
-  optionText: {
-    color: "#000",
-    fontSize: 18,
-    fontWeight: "semibold",
   },
 });
 

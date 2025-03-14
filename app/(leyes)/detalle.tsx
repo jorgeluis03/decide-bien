@@ -45,7 +45,7 @@ export default function DetalleLeyScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isFabOpen, setIsFabOpen] = useState(false);
-  
+
   /* CACHÉ */
   const { data, isLoading, isError, error } = useQuery<{ ley: Ley; seguimientos: any[] }>({
     queryKey: ["ley", id],
@@ -124,12 +124,20 @@ export default function DetalleLeyScreen() {
       </ScrollView>
 
       {/* Boton flotante */}
-      <FloatingActionButton
-        onCommentPress={() => console.log("Abrir comentarios")}
-        onVotePress={() => console.log("Votar por la ley")}
-        onToggle={(isOpen) => setIsFabOpen(isOpen)}
-        isOpen={isFabOpen}
-      />
+      <View>
+        <FloatingActionButton
+          onCommentPress={() => {
+            console.log("Abrir comentarios");
+            setIsFabOpen(false);
+          }}
+          onVotePress={() => {
+            router.push("/(leyes)/votarLey");
+            setIsFabOpen(false);
+          }}
+          onToggle={setIsFabOpen}
+          isOpen={isFabOpen}
+        />
+      </View>
 
     </SafeAreaView>
   );
