@@ -10,6 +10,7 @@ import {
     TextInput,
     Alert,
     ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -17,6 +18,8 @@ import { ThemedView } from "@/components/ThemedView";
 import { useRouter } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { fetchData } from "@/utils/fetchData";
+import { BASE_URL } from "@/constants/config";
 
 interface Votes {
     favor: number;
@@ -31,6 +34,8 @@ const VotarLeyScreen: React.FC = () => {
     const [votes, setVotes] = useState<Votes>({ favor: 150, contra: 80, neutral: 30 });
     const [dni, setDni] = useState("");
     const [selectedVote, setSelectedVote] = useState<keyof Votes | null>(null);
+    const [dniInfo, setDniInfo] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Memoizamos valores derivados para evitar recálculos innecesarios
     const snapPoints = useMemo(() => ["70%", "95%"], []);
@@ -74,12 +79,32 @@ const VotarLeyScreen: React.FC = () => {
         }));
     }, []);
 
-    const handleSearchDNI = useCallback(() => {
+    const handleSearchDNI = useCallback(async () => {
         if (dni.length !== 8 || isNaN(Number(dni))) {
             Alert.alert("Error", "Ingrese un DNI válido para buscar.");
             return;
         }
-        Alert.alert("Búsqueda DNI", `Verificando DNI: ${dni}`);
+
+        setIsLoading(true);
+        setDniInfo(null);
+
+        try {
+            const response = await fetchData<any>(
+                `${BASE_URL}/api/v1/consulta-dni?dni=${dni}`,
+                "GET"
+            );
+
+            if (response && response.data) {
+                setDniInfo(`Nombre: ${response.data.nombre || 'No disponible'}\nEdad: ${response.data.edad || 'No disponible'}`);
+            } else {
+                setDniInfo("No se encontró información para este DNI");
+            }
+        } catch (error) {
+            console.error("Error al buscar DNI:", error);
+            setDniInfo("Error al consultar el DNI. Intente nuevamente.");
+        } finally {
+            setIsLoading(false);
+        }
     }, [dni]);
 
     const renderVoteOption = useCallback((type: keyof Votes, icon: string, label: string) => {
@@ -178,10 +203,20 @@ const VotarLeyScreen: React.FC = () => {
                                         onChangeText={setDni}
                                         autoFocus
                                     />
-                                    <TouchableOpacity onPress={handleSearchDNI}>
-                                        <Ionicons name="search" size={24} color="black" />
+                                    <TouchableOpacity onPress={handleSearchDNI} disabled={isLoading}>
+                                        {isLoading ? (
+                                            <ActivityIndicator size="small" color="#007AFF" />
+                                        ) : (
+                                            <Ionicons name="search" size={24} color="black" />
+                                        )}
                                     </TouchableOpacity>
                                 </View>
+
+                                {dniInfo && (
+                                    <ThemedView style={styles.dniInfoContainer}>
+                                        <ThemedText style={styles.dniInfoText}>{dniInfo}</ThemedText>
+                                    </ThemedView>
+                                )}
 
                                 <Text style={styles.selectOptionText}>Seleccione una opción:</Text>
 
@@ -226,13 +261,25 @@ const colors = {
 };
 
 const styles = StyleSheet.create({
+    dniInfoContainer: {
+        width: "100%",
+        padding: 12,
+        backgroundColor: "#f0f0f0",
+        borderRadius: 8,
+        marginBottom: 16,
+    },
+    dniInfoText: {
+        fontSize: 14,
+        lineHeight: 20,
+        color: "#333",
+    },
     overlay: {
         position: "absolute",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo gris semitransparente
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     flex: { flex: 1 },
     container: {
