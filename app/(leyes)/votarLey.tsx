@@ -11,6 +11,7 @@ import {
     Alert,
     ScrollView,
     ActivityIndicator,
+    Keyboard
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -54,6 +55,7 @@ const VotarLeyScreen: React.FC = () => {
         setIsOpen(false);
         setDni("");
         setSelectedVote(null);
+        setDniInfo(null);
     }, []);
 
     const handleValidateDNI = useCallback(() => {
@@ -67,6 +69,7 @@ const VotarLeyScreen: React.FC = () => {
             return;
         }
 
+        Keyboard.dismiss();
         handleVote(selectedVote);
         Alert.alert("Éxito", `Tu voto ${selectedVote} ha sido registrado correctamente.`);
         handleCloseModal();
@@ -85,17 +88,14 @@ const VotarLeyScreen: React.FC = () => {
             return;
         }
 
+        Keyboard.dismiss();
         setIsLoading(true);
         setDniInfo(null);
 
         try {
-            const response = await fetchData<any>(
-                `${BASE_URL}/api/v1/consulta-dni?dni=${dni}`,
-                "GET"
-            );
-
-            if (response && response.data) {
-                setDniInfo(`Nombre: ${response.data.nombre || 'No disponible'}\nEdad: ${response.data.edad || 'No disponible'}`);
+            const response = await fetchData<any>(`${BASE_URL}/api/v1/consulta-dni?dni=${dni}`);
+            if (response) {
+                setDniInfo(`Nombres: ${response.nombres}\nApellidos: ${response.apellidoPaterno} ${response.apellidoMaterno}\nCódigo de Verificación: ${response.codigoVerificacion}`);
             } else {
                 setDniInfo("No se encontró información para este DNI");
             }
@@ -272,6 +272,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 20,
         color: "#333",
+        fontWeight: "600"
     },
     overlay: {
         position: "absolute",
