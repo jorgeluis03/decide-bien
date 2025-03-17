@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
     View,
     Text,
@@ -11,7 +11,9 @@ import {
     FlatList,
     Alert,
     ActivityIndicator,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    ScrollView,
+    Keyboard
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -19,6 +21,10 @@ import { ThemedView } from "@/components/ThemedView";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { obtenerComentarios, agregarComentario, darLikeComentario } from "@/services/firestoreService";
 import { Timestamp } from "firebase/firestore";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { fetchData } from "@/utils/fetchData";
+import { BASE_URL } from "@/constants/config";
 
 // Make this interface compatible with the one in firestoreService
 interface Comentario {
@@ -39,14 +45,146 @@ const ComentariosLeyScreen: React.FC = () => {
         titulo: string;
     }>();
 
+    const sheetRef = useRef<BottomSheet>(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const [dni, setDni] = useState("");
+    const [dniInfo, setDniInfo] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [nombreCompleto, setNombreCompleto] = useState("");
     const router = useRouter();
     const [comentarios, setComentarios] = useState<Comentario[]>([]);
     const [nuevoComentario, setNuevoComentario] = useState("");
     const [cargando, setCargando] = useState(true);
     const [enviando, setEnviando] = useState(false);
+    const [isEnviandoComentario, setIsEnviandoComentario] = useState(false);
+
+    const snapPoints = useMemo(() => ["70%"], []);
+
+    const handleOpenModal = useCallback(() => {
+        if (!nuevoComentario.trim()) {
+            Alert.alert("Error", "Escribe un comentario antes de enviar");
+            return;
+        }
+        setIsOpen(true);
+        sheetRef.current?.snapToIndex(0);
+    }, [nuevoComentario]);
+
+    const handleCloseModal = useCallback(() => {
+        setIsOpen(false);
+        setDni("");
+        setDniInfo(null);
+    }, []);
+
+    const handleSearchDNI = useCallback(async () => {
+        if (dni.length !== 8 || isNaN(Number(dni))) {
+            Alert.alert("Error", "Ingrese un DNI válido para buscar.");
+            return;
+        }
+
+        Keyboard.dismiss();
+        setIsLoading(true);
+        setDniInfo(null);
+
+        try {
+            const response = await fetchData<any>(`${BASE_URL}/api/v1/consulta-dni?dni=${dni}`);
+            if (response) {
+                const nombreCompleto = `${response.nombres} ${response.apellidoPaterno} ${response.apellidoMaterno}`;
+                setNombreCompleto(nombreCompleto);
+                setDniInfo(`Nombres: ${response.nombres}\nApellidos: ${response.apellidoPaterno} ${response.apellidoMaterno}\nCódigo de Verificación: ${response.codigoVerificacion}`);
+            } else {
+                setDniInfo("No se encontró información para este DNI");
+                setNombreCompleto("");
+            }
+        } catch (error) {
+            setDniInfo("Error al consultar el DNI. Intente nuevamente.");
+            setNombreCompleto("");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [dni]);
+
+    const handleValidateDNI = useCallback(async () => {
+        if (dni.length !== 8 || isNaN(Number(dni))) {
+            Alert.alert("Error", "Ingrese un DNI válido de 8 dígitos.");
+            return;
+        }
+
+        if (!nombreCompleto) {
+            Alert.alert("Error", "Debe validar su DNI antes de comentar.");
+            return;
+        }
+
+        if (!nuevoComentario.trim() || !idLey) {
+            Alert.alert("Error", "El comentario no puede estar vacío.");
+            return;
+        }
+
+        Keyboard.dismiss();
+        setIsEnviandoComentario(true);
+
+        try {
+            const comentarioData = {
+                leyId: idLey,
+                texto: nuevoComentario,
+                usuario: {
+                    dni: dni,
+                    nombreCompleto: nombreCompleto
+                }
+            };
+
+            const result = await agregarComentario(comentarioData);
+
+            if (result.success) {
+                // Verificar si el comentario ya existe en la lista
+                const comentarioExistente = comentarios.find(c => c.id === dni);
+
+                if (comentarioExistente) {
+                    // Actualizar el comentario existente
+                    setComentarios(prevComentarios =>
+                        prevComentarios.map(c =>
+                            c.id === dni
+                                ? {
+                                    ...c,
+                                    texto: nuevoComentario,
+                                    fecha: new Date()
+                                }
+                                : c
+                        )
+                    );
+                } else {
+                    // Agregar el nuevo comentario al estado local
+                    const nuevoComentarioObj: Comentario = {
+                        id: dni,
+                        texto: nuevoComentario,
+                        usuario: {
+                            dni: dni,
+                            nombreCompleto: nombreCompleto
+                        },
+                        fecha: new Date(),
+                        likes: 0,
+                        userHasLiked: false
+                    };
+
+                    setComentarios(prevComentarios => [nuevoComentarioObj, ...prevComentarios]);
+                }
+
+                setNuevoComentario("");
+                handleCloseModal();
+                Alert.alert("Éxito", "Tu comentario ha sido registrado correctamente.");
+            } else {
+                Alert.alert("Error", result.errorMessage || "No se pudo enviar el comentario");
+            }
+        } catch (error) {
+            console.error("Error al enviar comentario:", error);
+            Alert.alert("Error", "No se pudo enviar el comentario");
+        } finally {
+            setIsEnviandoComentario(false);
+        }
+    }, [dni, nombreCompleto, idLey, nuevoComentario, comentarios, handleCloseModal]);
+
     // Using dni to align with Firestore service requirements
     const usuario = {
-        dni: "12345678A", // Default value, should be replaced with actual user dni
+        dni: "12345678", // Default value, will be replaced with the validated DNI
         nombreCompleto: "Usuario Anónimo"
     };
 
@@ -77,69 +215,6 @@ const ComentariosLeyScreen: React.FC = () => {
 
         cargarComentarios();
     }, [idLey]);
-
-    const handleEnviarComentario = useCallback(async () => {
-        if (!nuevoComentario.trim() || !idLey) return;
-
-        try {
-            setEnviando(true);
-
-            const comentarioData = {
-                leyId: idLey,
-                texto: nuevoComentario,
-                usuario: {
-                    dni: usuario.dni,
-                    nombreCompleto: usuario.nombreCompleto
-                }
-            };
-
-            const result = await agregarComentario(comentarioData);
-
-            if (result.success) {
-                // Verificar si el comentario ya existe en la lista
-                const comentarioExistente = comentarios.find(c => c.id === usuario.dni);
-
-                if (comentarioExistente) {
-                    // Actualizar el comentario existente
-                    setComentarios(prevComentarios =>
-                        prevComentarios.map(c =>
-                            c.id === usuario.dni
-                                ? {
-                                    ...c,
-                                    texto: nuevoComentario,
-                                    fecha: new Date()
-                                }
-                                : c
-                        )
-                    );
-                } else {
-                    // Agregar el nuevo comentario al estado local
-                    const nuevoComentarioObj: Comentario = {
-                        id: usuario.dni, // El ID ahora es el DNI del usuario
-                        texto: nuevoComentario,
-                        usuario: {
-                            dni: usuario.dni,
-                            nombreCompleto: usuario.nombreCompleto
-                        },
-                        fecha: new Date(),
-                        likes: 0,
-                        userHasLiked: false
-                    };
-
-                    setComentarios(prevComentarios => [nuevoComentarioObj, ...prevComentarios]);
-                }
-
-                setNuevoComentario("");
-            } else {
-                Alert.alert("Error", result.errorMessage || "No se pudo enviar el comentario");
-            }
-        } catch (error) {
-            console.error("Error al enviar comentario:", error);
-            Alert.alert("Error", "No se pudo enviar el comentario");
-        } finally {
-            setEnviando(false);
-        }
-    }, [nuevoComentario, idLey, usuario, comentarios]);
 
     const handleLikeComentario = useCallback(async (id: string) => {
         if (!idLey) return;
@@ -226,84 +301,161 @@ const ComentariosLeyScreen: React.FC = () => {
     }, [handleLikeComentario]);
 
     return (
-        <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
-            {/* Header */}
-            <ThemedView style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    style={styles.backButton}
-                >
-                    <Ionicons name="arrow-back" size={24} color="black" />
-                </TouchableOpacity>
-                <ThemedText style={styles.headerTitle} numberOfLines={1}>
-                    Comentarios
-                </ThemedText>
-                <View style={styles.headerRight} />
-            </ThemedView>
-
-            {/* Información de la ley */}
-            <ThemedView style={styles.leyInfoContainer}>
-                <ThemedText style={styles.leyTitulo} numberOfLines={2}>
-                    {titulo}
-                </ThemedText>
-            </ThemedView>
-
-            {/* Lista de comentarios */}
-            {cargando ? (
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color="#007AFF" />
-                </View>
-            ) : (
-                <FlatList
-                    data={comentarios}
-                    renderItem={renderComentario}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.comentariosList}
-                    ListEmptyComponent={
-                        <View style={styles.emptyContainer}>
-                            <Ionicons name="chatbubble-ellipses-outline" size={60} color="#ccc" />
-                            <Text style={styles.emptyText}>No hay comentarios todavía</Text>
-                            <Text style={styles.emptySubtext}>Sé el primero en comentar sobre esta ley</Text>
-                        </View>
-                    }
-                />
-            )}
-
-            {/* Input para nuevo comentario */}
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-                style={styles.inputContainer}
-            >
-                <View style={styles.userInitials}>
-                    <Text style={styles.initialsText}>
-                        {usuario.nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                    </Text>
-                </View>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Escribe un comentario..."
-                    multiline
-                    value={nuevoComentario}
-                    onChangeText={setNuevoComentario}
-                />
-                {enviando ? (
-                    <ActivityIndicator size="small" color="#007AFF" style={styles.sendButton} />
-                ) : (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
+                {/* Header */}
+                <ThemedView style={styles.header}>
                     <TouchableOpacity
-                        onPress={handleEnviarComentario}
-                        disabled={!nuevoComentario.trim()}
-                        style={[
-                            styles.sendButton,
-                            !nuevoComentario.trim() && styles.disabledSendButton
-                        ]}
+                        onPress={() => router.back()}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        style={styles.backButton}
                     >
-                        <Ionicons name="send" size={24} color={nuevoComentario.trim() ? "#007AFF" : "#ccc"} />
+                        <Ionicons name="arrow-back" size={24} color="black" />
                     </TouchableOpacity>
+                    <ThemedText style={styles.headerTitle} numberOfLines={1}>
+                        Comentarios
+                    </ThemedText>
+                    <View style={styles.headerRight} />
+                </ThemedView>
+
+                {/* Información de la ley */}
+                <ThemedView style={styles.leyInfoContainer}>
+                    <ThemedText style={styles.leyTitulo} numberOfLines={2}>
+                        {titulo}
+                    </ThemedText>
+                </ThemedView>
+
+                {/* Lista de comentarios */}
+                {cargando ? (
+                    <View style={styles.centered}>
+                        <ActivityIndicator size="large" color="#007AFF" />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={comentarios}
+                        renderItem={renderComentario}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={styles.comentariosList}
+                        ListEmptyComponent={
+                            <View style={styles.emptyContainer}>
+                                <Ionicons name="chatbubble-ellipses-outline" size={60} color="#ccc" />
+                                <Text style={styles.emptyText}>No hay comentarios todavía</Text>
+                                <Text style={styles.emptySubtext}>Sé el primero en comentar sobre esta ley</Text>
+                            </View>
+                        }
+                    />
                 )}
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+
+                {/* Input para nuevo comentario */}
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+                    style={styles.inputContainer}
+                >
+                    <View style={styles.userInitials}>
+                        <Text style={styles.initialsText}>
+                            {usuario.nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                        </Text>
+                    </View>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Escribe un comentario..."
+                        multiline
+                        value={nuevoComentario}
+                        onChangeText={setNuevoComentario}
+                    />
+                    {enviando ? (
+                        <ActivityIndicator size="small" color="#007AFF" style={styles.sendButton} />
+                    ) : (
+                        <TouchableOpacity
+                            onPress={handleOpenModal}
+                            disabled={!nuevoComentario.trim()}
+                            style={[
+                                styles.sendButton,
+                                !nuevoComentario.trim() && styles.disabledSendButton
+                            ]}
+                        >
+                            <Ionicons name="send" size={24} color={nuevoComentario.trim() ? "#007AFF" : "#ccc"} />
+                        </TouchableOpacity>
+                    )}
+                </KeyboardAvoidingView>
+
+                {/*  */}
+                {isOpen && <View style={styles.overlay} />}
+
+                {/* BottomSheet para ingresar DNI */}
+                {isOpen && (
+                    <BottomSheet
+                        ref={sheetRef}
+                        snapPoints={snapPoints}
+                        enablePanDownToClose={true}
+                        onClose={handleCloseModal}
+                        index={0}
+                        keyboardBehavior="interactive"
+                    >
+                        <BottomSheetView style={styles.bottomSheetContentContainer}>
+                            <ScrollView
+                                style={{ width: '100%' }}
+                                contentContainerStyle={{ alignItems: 'center' }}
+                                showsVerticalScrollIndicator={false}
+                                keyboardShouldPersistTaps="handled"
+                            >
+                                <Text style={styles.bottomSheetTitle}>Confirma tu comentario</Text>
+                                <Text style={styles.bottomSheetText}>Ingrese su DNI para validar su comentario:</Text>
+                                <View style={styles.dniInputContainer}>
+                                    <TextInput
+                                        style={styles.dniInput}
+                                        placeholder="Ingrese su DNI"
+                                        keyboardType="numeric"
+                                        maxLength={8}
+                                        value={dni}
+                                        onChangeText={setDni}
+                                        autoFocus
+                                    />
+                                    <TouchableOpacity onPress={handleSearchDNI} disabled={isLoading}>
+                                        {isLoading ? (
+                                            <ActivityIndicator size="small" color="#007AFF" />
+                                        ) : (
+                                            <Ionicons name="search" size={24} color="black" />
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+
+                                {dniInfo && (
+                                    <ThemedView style={styles.dniInfoContainer}>
+                                        <ThemedText style={styles.dniInfoText}>{dniInfo}</ThemedText>
+                                    </ThemedView>
+                                )}
+
+                                <View style={styles.bottomSheetButtons}>
+                                    <TouchableOpacity
+                                        style={[styles.bottomSheetButton, styles.cancelButton]}
+                                        onPress={handleCloseModal}
+                                    >
+                                        <Text style={styles.cancelButtonText}>Cancelar</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.bottomSheetButton,
+                                            styles.confirmButton,
+                                            !nombreCompleto ? styles.disabledButton : {}
+                                        ]}
+                                        onPress={handleValidateDNI}
+                                        disabled={!nombreCompleto}
+                                    >
+                                        {isEnviandoComentario ? (
+                                            <ActivityIndicator size="small" color="white" />
+                                        ) : (
+                                            <Text style={styles.confirmButtonText}>Confirmar</Text>
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
+                        </BottomSheetView>
+                    </BottomSheet>
+                )}
+            </SafeAreaView>
+        </GestureHandlerRootView>
     );
 };
 
@@ -477,6 +629,104 @@ const styles = StyleSheet.create({
         marginTop: 5,
         textAlign: "center",
         paddingHorizontal: 20,
+    },
+    dniInfoContainer: {
+        width: "100%",
+        padding: 12,
+        backgroundColor: "#f0f0f0",
+        borderRadius: 8,
+        marginBottom: 16,
+    },
+    dniInfoText: {
+        fontSize: 14,
+        lineHeight: 20,
+        color: "#333",
+        fontWeight: "600"
+    },
+    overlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    bottomSheetContentContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "flex-start",
+        backgroundColor: "white",
+        padding: 24,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16
+    },
+    bottomSheetTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+        marginBottom: 16,
+        color: "#222"
+    },
+    bottomSheetText: {
+        fontSize: 16,
+        marginBottom: 16,
+        textAlign: "center",
+        color: "#444"
+    },
+    bottomSheetButtons: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+        marginTop: 24
+    },
+    bottomSheetButton: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2
+    },
+    cancelButton: {
+        backgroundColor: "#e0e0e0",
+        marginRight: 8
+    },
+    confirmButton: {
+        backgroundColor: "#4CAF50",
+        marginLeft: 8
+    },
+    cancelButtonText: {
+        color: "#333",
+        fontSize: 16,
+        fontWeight: "bold"
+    },
+    confirmButtonText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold"
+    },
+    disabledButton: {
+        backgroundColor: "#9E9E9E",
+        opacity: 0.7
+    },
+    dniInputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        width: "100%"
+    },
+    dniInput: {
+        flex: 1,
+        fontSize: 16,
+        padding: 0,
+        marginRight: 10
     },
 });
 
