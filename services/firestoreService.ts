@@ -8,8 +8,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// 🔹 Interfaz para el voto
-export interface Voto {
+//Interfaz para el voto
+interface Voto {
   dni: string;
   leyId: string;
   nombreCompleto: string;
@@ -17,8 +17,8 @@ export interface Voto {
   timestamp?: any;
 }
 
-// 🔹 Función para registrar un voto
-export const registrarVoto = async (votoData: Voto): Promise<boolean> => {
+//Función para registrar un voto
+export const registrarVoto = async (votoData: Voto): Promise<{ success: boolean, errorMessage?: string }> => {
   try {
     const { dni, leyId, voto } = votoData;
     const leyRef = doc(db, "leyes", leyId);
@@ -33,8 +33,10 @@ export const registrarVoto = async (votoData: Voto): Promise<boolean> => {
     // Verificar si el usuario ya votó
     const votanteSnap = await getDoc(votanteRef);
     if (votanteSnap.exists()) {
-      console.error("El usuario ya ha votado en esta ley.");
-      return false;
+      return {
+        success: false,
+        errorMessage: "Ya has emitido tu voto para esta ley anteriormente."
+      };
     }
 
     // Registrar el voto en la subcolección 'votantes'
@@ -46,8 +48,10 @@ export const registrarVoto = async (votoData: Voto): Promise<boolean> => {
     // Obtener nuevamente la ley después de la posible creación
     const leyData = (await getDoc(leyRef)).data();
     if (!leyData) {
-      console.error("No se pudo obtener los datos de la ley.");
-      return false;
+      return {
+        success: false,
+        errorMessage: "No se pudieron obtener los datos de la ley."
+      };
     }
 
     // Actualizar el conteo de votos
@@ -60,10 +64,38 @@ export const registrarVoto = async (votoData: Voto): Promise<boolean> => {
 
     await updateDoc(leyRef, { votos: votosActualizados });
 
-    console.log("Voto registrado correctamente.");
-    return true;
+    return { success: true };
   } catch (error) {
-    console.error("Error al registrar voto:", error);
-    return false;
+    return {
+      success: false,
+      errorMessage: "Error en el servidor: No se pudo registrar el voto. Por favor, intenta nuevamente más tarde."
+    };
+  }
+};
+
+interface Votes {
+  aFavor: number;
+  enContra: number;
+  neutral: number;
+}
+//Función para obtener los votos de una ley
+export const obtenerEstadisticasVotos = async (leyId: string): Promise<Votes | null> => {
+  try {
+    const leyRef = doc(db, "leyes", leyId);
+    const leySnap = await getDoc(leyRef);
+    
+    if (!leySnap.exists()) {
+      return { aFavor: 0, enContra: 0, neutral: 0 };
+    }
+    
+    const data = leySnap.data();
+    return {
+      aFavor: data.votos?.aFavor || 0,
+      enContra: data.votos?.enContra || 0,
+      neutral: data.votos?.neutral || 0
+    };
+  } catch (error) {
+    console.error("Error al obtener estadísticas de votos:", error);
+    return null;
   }
 };

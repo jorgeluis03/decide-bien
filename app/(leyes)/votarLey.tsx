@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import {
     View,
     Text,
@@ -21,7 +21,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
-import { registrarVoto } from "@/services/firestoreService";
+import { registrarVoto, obtenerEstadisticasVotos } from "@/services/firestoreService";
 
 interface Votes {
     aFavor: number;
@@ -39,13 +39,27 @@ const VotarLeyScreen: React.FC = () => {
     const sheetRef = useRef<BottomSheet>(null);
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
-    const [votes, setVotes] = useState<Votes>({ aFavor: 150, enContra: 80, neutral: 30 });
+    const [votes, setVotes] = useState<Votes>({ aFavor: 0, enContra: 0, neutral: 0 });
     const [dni, setDni] = useState("");
     const [selectedVote, setSelectedVote] = useState<keyof Votes | null>(null);
     const [dniInfo, setDniInfo] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isEnviandoVoto, setIsEnviandoVoto] = useState(false);
     const [nombreCompleto, setNombreCompleto] = useState("");
+
+    // Obtener las estadísticas de votación de la ley
+    useEffect(() => {
+        const fetchVoteStats = async () => {
+            if (idLey) {
+                const stats = await obtenerEstadisticasVotos(idLey);
+                if (stats) {
+                    setVotes(stats);
+                }
+            }
+        };
+
+        fetchVoteStats();
+    }, [idLey]);
 
     // Memoizamos valores derivados para evitar recálculos innecesarios
     const snapPoints = useMemo(() => ["70%", "95%"], []);
@@ -96,8 +110,8 @@ const VotarLeyScreen: React.FC = () => {
             };
 
             // Registrar el voto en Firestore
-            const success = await registrarVoto(votoData);
-            if (success) {
+            const result = await registrarVoto(votoData);
+            if (result.success) {
                 Alert.alert("Voto registrado", "¡Gracias por participar en la votación!");
                 setVotes((prevVotes) => ({
                     ...prevVotes,
@@ -105,23 +119,14 @@ const VotarLeyScreen: React.FC = () => {
                 }));
                 handleCloseModal();
             } else {
-                Alert.alert("Error", "Hubo un problema al registrar su voto. Intente nuevamente.");
+                Alert.alert("Error", result.errorMessage);
             }
-
         } catch (error) {
-            console.error("Error al enviar voto:", error);
             Alert.alert("Error", "Hubo un problema al enviar su voto. Verifique su conexión e intente nuevamente.");
         } finally {
             setIsEnviandoVoto(false);
         }
     }, [dni, selectedVote, nombreCompleto, idLey]);
-
-    const handleVote = useCallback((type: keyof Votes) => {
-        setVotes((prevVotes) => ({
-            ...prevVotes,
-            [type]: prevVotes[type] + 1,
-        }));
-    }, []);
 
     const handleSearchDNI = useCallback(async () => {
         if (dni.length !== 8 || isNaN(Number(dni))) {
@@ -144,7 +149,6 @@ const VotarLeyScreen: React.FC = () => {
                 setNombreCompleto("");
             }
         } catch (error) {
-            console.error("Error al buscar DNI:", error);
             setDniInfo("Error al consultar el DNI. Intente nuevamente.");
             setNombreCompleto("");
         } finally {
