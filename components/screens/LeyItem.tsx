@@ -15,7 +15,7 @@ export default function LeyItem({ pleyNum, desEstado, titulo, fecPresentacion, a
     <Link href={`/(leyes)/detalle?id=${pleyNum}`} asChild>
       <TouchableOpacity style={styles.itemContainer}>
         <ThemedText style={styles.estado}>{desEstado}</ThemedText>
-        <ThemedText style={styles.titulo}>{titulo}</ThemedText>
+        <ThemedText style={styles.titulo}>{`[${pleyNum}] ${titulo}`}</ThemedText>
         <ThemedText style={styles.fecha}>📅 {new Date(fecPresentacion).toLocaleDateString()}</ThemedText>
         <ThemedText style={styles.autores}>🖊 {autores}</ThemedText>
       </TouchableOpacity>

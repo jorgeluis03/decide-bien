@@ -11,8 +11,7 @@ import {
     FlatList,
     Alert,
     ActivityIndicator,
-    KeyboardAvoidingView,
-    Image
+    KeyboardAvoidingView
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -28,7 +27,6 @@ interface Comentario {
     usuario: {
         dni: string;
         nombreCompleto: string;
-        avatar?: string;
     };
     fecha: Timestamp | Date;
     likes: number;
@@ -49,26 +47,25 @@ const ComentariosLeyScreen: React.FC = () => {
     // Using dni to align with Firestore service requirements
     const usuario = {
         dni: "12345678A", // Default value, should be replaced with actual user dni
-        nombreCompleto: "Usuario Anónimo",
-        avatar: "https://i.pravatar.cc/150?img=" + Math.floor(Math.random() * 70)
+        nombreCompleto: "Usuario Anónimo"
     };
 
     // Cargar comentarios al iniciar
     useEffect(() => {
         const cargarComentarios = async () => {
             if (!idLey) return;
-            
+
             try {
                 setCargando(true);
                 const comentariosData = await obtenerComentarios(idLey);
-                
+
                 // Transform the data to match the component's expected format
                 const formattedComentarios = comentariosData.map(comment => ({
                     ...comment,
                     id: comment.id || "",
                     userHasLiked: false // Default value, should be updated based on user's likes
                 }));
-                
+
                 setComentarios(formattedComentarios);
             } catch (error) {
                 console.error("Error al obtener comentarios:", error);
@@ -83,38 +80,55 @@ const ComentariosLeyScreen: React.FC = () => {
 
     const handleEnviarComentario = useCallback(async () => {
         if (!nuevoComentario.trim() || !idLey) return;
-        
+
         try {
             setEnviando(true);
-            
+
             const comentarioData = {
                 leyId: idLey,
                 texto: nuevoComentario,
                 usuario: {
                     dni: usuario.dni,
-                    nombreCompleto: usuario.nombreCompleto,
-                    avatar: usuario.avatar
+                    nombreCompleto: usuario.nombreCompleto
                 }
             };
-            
+
             const result = await agregarComentario(comentarioData);
-            
+
             if (result.success) {
-                // Agregar el nuevo comentario al estado local
-                const nuevoComentarioObj: Comentario = {
-                    id: result.id || Date.now().toString(),
-                    texto: nuevoComentario,
-                    usuario: {
-                        dni: usuario.dni,
-                        nombreCompleto: usuario.nombreCompleto,
-                        avatar: usuario.avatar
-                    },
-                    fecha: new Date(),
-                    likes: 0,
-                    userHasLiked: false
-                };
-                
-                setComentarios(prevComentarios => [nuevoComentarioObj, ...prevComentarios]);
+                // Verificar si el comentario ya existe en la lista
+                const comentarioExistente = comentarios.find(c => c.id === usuario.dni);
+
+                if (comentarioExistente) {
+                    // Actualizar el comentario existente
+                    setComentarios(prevComentarios =>
+                        prevComentarios.map(c =>
+                            c.id === usuario.dni
+                                ? {
+                                    ...c,
+                                    texto: nuevoComentario,
+                                    fecha: new Date()
+                                }
+                                : c
+                        )
+                    );
+                } else {
+                    // Agregar el nuevo comentario al estado local
+                    const nuevoComentarioObj: Comentario = {
+                        id: usuario.dni, // El ID ahora es el DNI del usuario
+                        texto: nuevoComentario,
+                        usuario: {
+                            dni: usuario.dni,
+                            nombreCompleto: usuario.nombreCompleto
+                        },
+                        fecha: new Date(),
+                        likes: 0,
+                        userHasLiked: false
+                    };
+
+                    setComentarios(prevComentarios => [nuevoComentarioObj, ...prevComentarios]);
+                }
+
                 setNuevoComentario("");
             } else {
                 Alert.alert("Error", result.errorMessage || "No se pudo enviar el comentario");
@@ -125,7 +139,7 @@ const ComentariosLeyScreen: React.FC = () => {
         } finally {
             setEnviando(false);
         }
-    }, [nuevoComentario, idLey, usuario]);
+    }, [nuevoComentario, idLey, usuario, comentarios]);
 
     const handleLikeComentario = useCallback(async (id: string) => {
         if (!idLey) return;
@@ -133,16 +147,16 @@ const ComentariosLeyScreen: React.FC = () => {
         try {
             // Call the Firestore service to like/unlike comment
             const success = await darLikeComentario(idLey, id, usuario.dni);
-            
+
             if (success) {
                 // Update local state
-                setComentarios(prevComentarios => 
-                    prevComentarios.map(comentario => 
-                        comentario.id === id 
+                setComentarios(prevComentarios =>
+                    prevComentarios.map(comentario =>
+                        comentario.id === id
                             ? {
                                 ...comentario,
-                                likes: comentario.userHasLiked 
-                                    ? comentario.likes - 1 
+                                likes: comentario.userHasLiked
+                                    ? comentario.likes - 1
                                     : comentario.likes + 1,
                                 userHasLiked: !comentario.userHasLiked
                             }
@@ -166,22 +180,23 @@ const ComentariosLeyScreen: React.FC = () => {
         } else {
             fecha = new Date();
         }
-        
+
         const fechaFormateada = fecha instanceof Date && !isNaN(fecha.getTime())
-            ? fecha.toLocaleDateString('es-ES', { 
-                day: 'numeric', 
-                month: 'short', 
-                hour: '2-digit', 
-                minute: '2-digit' 
+            ? fecha.toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
             })
             : 'Fecha no disponible';
-        
+
         return (
             <ThemedView style={styles.comentarioContainer}>
-                <Image 
-                    source={{ uri: item.usuario.avatar || 'https://i.pravatar.cc/150' }} 
-                    style={styles.avatarImage}
-                />
+                <View style={styles.comentarioInitials}>
+                    <Text style={styles.initialsText}>
+                        {item.usuario.nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    </Text>
+                </View>
                 <View style={styles.comentarioContent}>
                     <View style={styles.comentarioHeader}>
                         <Text style={styles.nombreUsuario}>{item.usuario.nombreCompleto}</Text>
@@ -189,14 +204,14 @@ const ComentariosLeyScreen: React.FC = () => {
                     </View>
                     <Text style={styles.textoComentario}>{item.texto}</Text>
                     <View style={styles.comentarioFooter}>
-                        <TouchableOpacity 
-                            style={styles.likeButton} 
+                        <TouchableOpacity
+                            style={styles.likeButton}
                             onPress={() => handleLikeComentario(item.id)}
                         >
-                            <Ionicons 
-                                name={item.userHasLiked ? "heart" : "heart-outline"} 
-                                size={20} 
-                                color={item.userHasLiked ? "#F44336" : "#666"} 
+                            <Ionicons
+                                name={item.userHasLiked ? "heart" : "heart-outline"}
+                                size={20}
+                                color={item.userHasLiked ? "#F44336" : "#666"}
                             />
                             <Text style={styles.likeCount}>{item.likes}</Text>
                         </TouchableOpacity>
@@ -256,15 +271,16 @@ const ComentariosLeyScreen: React.FC = () => {
             )}
 
             {/* Input para nuevo comentario */}
-            <KeyboardAvoidingView 
+            <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
                 style={styles.inputContainer}
             >
-                <Image 
-                    source={{ uri: usuario.avatar }} 
-                    style={styles.inputAvatar}
-                />
+                <View style={styles.userInitials}>
+                    <Text style={styles.initialsText}>
+                        {usuario.nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    </Text>
+                </View>
                 <TextInput
                     style={styles.input}
                     placeholder="Escribe un comentario..."
@@ -344,11 +360,18 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#f0f0f0",
     },
-    avatarImage: {
+    comentarioInitials: {
         width: 40,
         height: 40,
         borderRadius: 20,
+        backgroundColor: "#E1E1E1",
+        justifyContent: "center",
+        alignItems: "center",
         marginRight: 12,
+    },
+    initialsText: {
+        fontWeight: "bold",
+        color: "#555",
     },
     comentarioContent: {
         flex: 1,
@@ -409,10 +432,13 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: "#eee",
     },
-    inputAvatar: {
+    userInitials: {
         width: 36,
         height: 36,
         borderRadius: 18,
+        backgroundColor: "#E1E1E1",
+        justifyContent: "center",
+        alignItems: "center",
         marginRight: 10,
     },
     input: {

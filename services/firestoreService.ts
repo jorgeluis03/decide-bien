@@ -126,29 +126,37 @@ export const agregarComentario = async (comentarioData: {
   usuario: { dni: string; nombreCompleto: string; avatar?: string };
 }): Promise<{ success: boolean; id?: string; errorMessage?: string }> => {
   try {
+    const { leyId, texto, usuario } = comentarioData;
+    const leyRef = doc(db, "leyes", leyId);
+    
+    // Use DNI as the document ID for the comment
+    const comentarioRef = doc(collection(leyRef, "comentarios"), usuario.dni);
+    
+    // Check if the user already has a comment
+    const comentarioSnap = await getDoc(comentarioRef);
+    const isUpdate = comentarioSnap.exists();
+    
     const nuevoComentario: Omit<Comentario, 'id'> = {
-      leyId: comentarioData.leyId,
-      texto: comentarioData.texto,
-      usuario: comentarioData.usuario,
+      leyId,
+      texto,
+      usuario,
       fecha: serverTimestamp() as Timestamp,
-      likes: 0
+      likes: isUpdate ? (comentarioSnap.data()?.likes || 0) : 0
     };
-
-    // Use subcollection of comentarios under the ley document
-    const leyRef = doc(db, "leyes", comentarioData.leyId);
-    const comentariosCollection = collection(leyRef, "comentarios");
-
-    // Use addDoc to generate a new document with auto-ID
-    const docRef = await addDoc(comentariosCollection, nuevoComentario);
-
-    // Update comentarios count in the law document
-    await updateDoc(leyRef, {
-      comentariosCount: increment(1)
-    });
-
+    
+    // Set the document with the DNI as the ID
+    await setDoc(comentarioRef, nuevoComentario);
+    
+    // If it's a new comment (not an update), increment the count
+    if (!isUpdate) {
+      await updateDoc(leyRef, {
+        comentariosCount: increment(1)
+      });
+    }
+    
     return {
       success: true,
-      id: docRef.id
+      id: usuario.dni
     };
   } catch (error) {
     console.error("Error al agregar comentario:", error);
