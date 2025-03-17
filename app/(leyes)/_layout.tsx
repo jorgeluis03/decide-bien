@@ -26,6 +26,15 @@ export default function LeyesLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen name="comentariosLey"
+          options={{
+            title: 'Comentarios Ley',
+            headerTitleStyle: {
+              fontWeight: 'medium',
+            },
+            headerShown: false,
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

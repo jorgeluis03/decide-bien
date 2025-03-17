@@ -128,7 +128,13 @@ export default function DetalleLeyScreen() {
       <View>
         <FloatingActionButton
           onCommentPress={() => {
-            console.log("Abrir comentarios");
+            router.push({
+              pathname: "/(leyes)/comentariosLey",
+              params: {
+                idLey: ley?.pleyId,
+                titulo: ley?.titulo,
+              }
+            });
             setIsFabOpen(false);
           }}
           onVotePress={() => {

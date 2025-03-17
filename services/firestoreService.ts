@@ -6,6 +6,13 @@ import {
   setDoc,
   updateDoc,
   serverTimestamp,
+  Timestamp,
+  deleteDoc,
+  increment,
+  getDocs,
+  orderBy,
+  query,
+  addDoc,
 } from "firebase/firestore";
 
 //Interfaz para el voto
@@ -83,11 +90,11 @@ export const obtenerEstadisticasVotos = async (leyId: string): Promise<Votes | n
   try {
     const leyRef = doc(db, "leyes", leyId);
     const leySnap = await getDoc(leyRef);
-    
+
     if (!leySnap.exists()) {
       return { aFavor: 0, enContra: 0, neutral: 0 };
     }
-    
+
     const data = leySnap.data();
     return {
       aFavor: data.votos?.aFavor || 0,
@@ -97,5 +104,131 @@ export const obtenerEstadisticasVotos = async (leyId: string): Promise<Votes | n
   } catch (error) {
     console.error("Error al obtener estadísticas de votos:", error);
     return null;
+  }
+};
+
+interface Comentario {
+  id?: string;
+  leyId: string;
+  texto: string;
+  usuario: {
+    dni: string;
+    nombreCompleto: string;
+    avatar?: string;
+  };
+  fecha: Timestamp;
+  likes: number;
+}
+
+export const agregarComentario = async (comentarioData: {
+  leyId: string;
+  texto: string;
+  usuario: { dni: string; nombreCompleto: string; avatar?: string };
+}): Promise<{ success: boolean; id?: string; errorMessage?: string }> => {
+  try {
+    const nuevoComentario: Omit<Comentario, 'id'> = {
+      leyId: comentarioData.leyId,
+      texto: comentarioData.texto,
+      usuario: comentarioData.usuario,
+      fecha: serverTimestamp() as Timestamp,
+      likes: 0
+    };
+
+    // Use subcollection of comentarios under the ley document
+    const leyRef = doc(db, "leyes", comentarioData.leyId);
+    const comentariosCollection = collection(leyRef, "comentarios");
+
+    // Use addDoc to generate a new document with auto-ID
+    const docRef = await addDoc(comentariosCollection, nuevoComentario);
+
+    // Update comentarios count in the law document
+    await updateDoc(leyRef, {
+      comentariosCount: increment(1)
+    });
+
+    return {
+      success: true,
+      id: docRef.id
+    };
+  } catch (error) {
+    console.error("Error al agregar comentario:", error);
+    return {
+      success: false,
+      errorMessage: "No se pudo agregar el comentario. Intenta nuevamente."
+    };
+  }
+};
+
+// Función para obtener comentarios de una ley
+export const obtenerComentarios = async (
+  leyId: string,
+  options?: { limit?: number; orderByLikes?: boolean }
+): Promise<Comentario[]> => {
+  try {
+    const leyRef = doc(db, "leyes", leyId);
+    const comentariosRef = collection(leyRef, "comentarios");
+
+    // Build query with options
+    let q = query(
+      comentariosRef,
+      options?.orderByLikes
+        ? orderBy("likes", "desc")
+        : orderBy("fecha", "desc")
+    );
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        leyId: data.leyId,
+        texto: data.texto,
+        usuario: data.usuario,
+        fecha: data.fecha,
+        likes: data.likes || 0
+      };
+    });
+  } catch (error) {
+    console.error("Error al obtener comentarios:", error);
+    return [];
+  }
+};
+
+// Función para dar like a un comentario
+export const darLikeComentario = async (
+  leyId: string,
+  comentarioId: string,
+  userDni: string
+): Promise<boolean> => {
+  try {
+    const leyRef = doc(db, "leyes", leyId);
+    const comentarioRef = doc(collection(leyRef, "comentarios"), comentarioId);
+    const likeRef = doc(collection(comentarioRef, "likes"), userDni);
+
+    // Check if user already liked
+    const likeDoc = await getDoc(likeRef);
+
+    if (likeDoc.exists()) {
+      // User already liked, remove like
+      await deleteDoc(likeRef);
+      await updateDoc(comentarioRef, {
+        likes: increment(-1)
+      });
+    } else {
+      // Add like
+      await setDoc(likeRef, {
+        timestamp: serverTimestamp(),
+        dni: userDni
+      });
+      await updateDoc(comentarioRef, {
+        likes: increment(1)
+      });
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error al gestionar like:", error);
+    return false;
   }
 };
