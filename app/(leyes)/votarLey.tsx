@@ -16,31 +16,40 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
+import { registrarVoto } from "@/services/firestoreService";
 
 interface Votes {
-    favor: number;
-    contra: number;
+    aFavor: number;
+    enContra: number;
     neutral: number;
 }
 
 const VotarLeyScreen: React.FC = () => {
+    const { idLey, titulo, sumilla } = useLocalSearchParams<{
+        idLey: string;
+        titulo: string;
+        sumilla: string;
+    }>();
+
     const sheetRef = useRef<BottomSheet>(null);
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
-    const [votes, setVotes] = useState<Votes>({ favor: 150, contra: 80, neutral: 30 });
+    const [votes, setVotes] = useState<Votes>({ aFavor: 150, enContra: 80, neutral: 30 });
     const [dni, setDni] = useState("");
     const [selectedVote, setSelectedVote] = useState<keyof Votes | null>(null);
     const [dniInfo, setDniInfo] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isEnviandoVoto, setIsEnviandoVoto] = useState(false);
+    const [nombreCompleto, setNombreCompleto] = useState("");
 
     // Memoizamos valores derivados para evitar recálculos innecesarios
     const snapPoints = useMemo(() => ["70%", "95%"], []);
-    const totalVotes = useMemo(() => votes.favor + votes.contra + votes.neutral, [votes]);
+    const totalVotes = useMemo(() => votes.aFavor + votes.enContra + votes.neutral, [votes]);
 
     const percentage = useCallback((count: number) => {
         return ((count / totalVotes) * 100).toFixed(1);
@@ -58,7 +67,7 @@ const VotarLeyScreen: React.FC = () => {
         setDniInfo(null);
     }, []);
 
-    const handleValidateDNI = useCallback(() => {
+    const handleValidateDNI = useCallback(async () => {
         if (!selectedVote) {
             Alert.alert("Error", "Selecciona una opción de voto.");
             return;
@@ -69,11 +78,43 @@ const VotarLeyScreen: React.FC = () => {
             return;
         }
 
+        if (!nombreCompleto) {
+            Alert.alert("Error", "Debe validar su DNI antes de votar.");
+            return;
+        }
+
         Keyboard.dismiss();
-        handleVote(selectedVote);
-        Alert.alert("Éxito", `Tu voto ${selectedVote} ha sido registrado correctamente.`);
-        handleCloseModal();
-    }, [dni, selectedVote]);
+        setIsEnviandoVoto(true);
+
+        try {
+            // Preparar los datos para enviar
+            const votoData = {
+                leyId: idLey,
+                dni: dni,
+                nombreCompleto: nombreCompleto,
+                voto: selectedVote
+            };
+
+            // Registrar el voto en Firestore
+            const success = await registrarVoto(votoData);
+            if (success) {
+                Alert.alert("Voto registrado", "¡Gracias por participar en la votación!");
+                setVotes((prevVotes) => ({
+                    ...prevVotes,
+                    [selectedVote]: prevVotes[selectedVote] + 1
+                }));
+                handleCloseModal();
+            } else {
+                Alert.alert("Error", "Hubo un problema al registrar su voto. Intente nuevamente.");
+            }
+
+        } catch (error) {
+            console.error("Error al enviar voto:", error);
+            Alert.alert("Error", "Hubo un problema al enviar su voto. Verifique su conexión e intente nuevamente.");
+        } finally {
+            setIsEnviandoVoto(false);
+        }
+    }, [dni, selectedVote, nombreCompleto, idLey]);
 
     const handleVote = useCallback((type: keyof Votes) => {
         setVotes((prevVotes) => ({
@@ -95,13 +136,17 @@ const VotarLeyScreen: React.FC = () => {
         try {
             const response = await fetchData<any>(`${BASE_URL}/api/v1/consulta-dni?dni=${dni}`);
             if (response) {
+                const nombreCompleto = `${response.nombres} ${response.apellidoPaterno} ${response.apellidoMaterno}`;
+                setNombreCompleto(nombreCompleto);
                 setDniInfo(`Nombres: ${response.nombres}\nApellidos: ${response.apellidoPaterno} ${response.apellidoMaterno}\nCódigo de Verificación: ${response.codigoVerificacion}`);
             } else {
                 setDniInfo("No se encontró información para este DNI");
+                setNombreCompleto("");
             }
         } catch (error) {
             console.error("Error al buscar DNI:", error);
             setDniInfo("Error al consultar el DNI. Intente nuevamente.");
+            setNombreCompleto("");
         } finally {
             setIsLoading(false);
         }
@@ -132,17 +177,26 @@ const VotarLeyScreen: React.FC = () => {
                     >
                         <Ionicons name="arrow-back" size={24} color="black" />
                     </TouchableOpacity>
-                    <ThemedText style={styles.headerTitle}>Votar Ley</ThemedText>
                 </ThemedView>
 
                 <ThemedText style={styles.title}>¿Qué opinas sobre esta ley?</ThemedText>
 
+                {/* Información de la ley */}
+                <ThemedView style={styles.leyInfoContainer}>
+                    <ThemedText style={styles.leyTitulo} numberOfLines={2}>
+                        {titulo}
+                    </ThemedText>
+                    <ThemedText style={styles.leySumilla}>
+                        {sumilla}
+                    </ThemedText>
+                </ThemedView>
+
                 {/* Estadísticas de votación */}
                 <View style={styles.statsContainer}>
-                    {(["favor", "neutral", "contra"] as Array<keyof Votes>).map((type) => (
+                    {(["aFavor", "neutral", "enContra"] as Array<keyof Votes>).map((type) => (
                         <View key={type} style={styles.statRow}>
                             <Text style={styles.statLabel}>
-                                {type === "favor" ? "A Favor" : type === "neutral" ? "Neutral" : "En Contra"} ({votes[type]})
+                                {type === "aFavor" ? "A Favor" : type === "neutral" ? "Neutral" : "En Contra"} ({votes[type]})
                             </Text>
                             <View style={styles.progressBarBackground}>
                                 <View
@@ -163,7 +217,7 @@ const VotarLeyScreen: React.FC = () => {
                 {/* Sección de votos */}
                 <View style={styles.voteContainer}>
                     <TouchableOpacity
-                        style={[styles.voteButton, styles.favor]}
+                        style={[styles.voteButton, styles.aFavor]}
                         onPress={handleOpenModal}
                         activeOpacity={0.8}
                     >
@@ -221,9 +275,9 @@ const VotarLeyScreen: React.FC = () => {
                                 <Text style={styles.selectOptionText}>Seleccione una opción:</Text>
 
                                 <View style={styles.voteContainer}>
-                                    {renderVoteOption("favor", "thumbs-up", "A Favor")}
+                                    {renderVoteOption("aFavor", "thumbs-up", "A Favor")}
                                     {renderVoteOption("neutral", "remove-circle", "Neutral")}
-                                    {renderVoteOption("contra", "thumbs-down", "En Contra")}
+                                    {renderVoteOption("enContra", "thumbs-down", "En Contra")}
                                 </View>
 
                                 <View style={styles.bottomSheetButtons}>
@@ -242,7 +296,11 @@ const VotarLeyScreen: React.FC = () => {
                                         onPress={handleValidateDNI}
                                         disabled={!selectedVote || dni.length !== 8}
                                     >
-                                        <Text style={styles.confirmButtonText}>Confirmar</Text>
+                                        {isEnviandoVoto ? (
+                                            <ActivityIndicator size="small" color="white" />
+                                        ) : (
+                                            <Text style={styles.confirmButtonText}>Confirmar</Text>
+                                        )}
                                     </TouchableOpacity>
                                 </View>
                             </ScrollView>
@@ -255,12 +313,31 @@ const VotarLeyScreen: React.FC = () => {
 };
 
 const colors = {
-    favor: "#4CAF50",
+    aFavor: "#4CAF50",
     neutral: "#FF9800",
-    contra: "#F44336",
+    enContra: "#F44336",
 };
 
 const styles = StyleSheet.create({
+    leyInfoContainer: {
+        width: "100%",
+        backgroundColor: "#e6f7ff",
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 20,
+    },
+    leyTitulo: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 6,
+    },
+    leySumilla: {
+        fontSize: 14,
+        color: "#666",
+        fontStyle: "italic",
+        lineHeight: 20,
+    },
     dniInfoContainer: {
         width: "100%",
         padding: 12,
@@ -312,7 +389,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#222",
         textAlign: "center",
-        marginBottom: 24
+        marginBottom: 12
     },
     statsContainer: {
         width: "100%",
@@ -357,9 +434,9 @@ const styles = StyleSheet.create({
         shadowColor: "#000",
         shadowRadius: 3,
     },
-    favor: { backgroundColor: colors.favor },
+    aFavor: { backgroundColor: colors.aFavor },
     neutral: { backgroundColor: colors.neutral },
-    contra: { backgroundColor: colors.contra },
+    enContra: { backgroundColor: colors.enContra },
     opaque: { opacity: 0.6 },
     voteText: {
         color: "white",

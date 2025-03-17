@@ -1,75 +1,69 @@
 import { db } from "../firebaseConfig";
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  getDoc, 
-  doc, 
-  updateDoc, 
-  deleteDoc 
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 
-// 🔹 Definir la interfaz para un usuario
-export interface User {
-  id: string; // ID es opcional porque Firestore lo genera
-  name: string;
-  age: number;
+// 🔹 Interfaz para el voto
+export interface Voto {
+  dni: string;
+  leyId: string;
+  nombreCompleto: string;
+  voto: "aFavor" | "enContra" | "neutral";
+  timestamp?: any;
 }
 
-// 🔹 Agregar un documento con ID automático
-export const addUser = async (userData: Omit<User, "id">): Promise<string | null> => {
+// 🔹 Función para registrar un voto
+export const registrarVoto = async (votoData: Voto): Promise<boolean> => {
   try {
-    const docRef = await addDoc(collection(db, "users"), userData);
-    return docRef.id; // Retorna el ID del nuevo documento
-  } catch (error) {
-    console.error("Error al agregar usuario:", error);
-    return null;
-  }
-};
+    const { dni, leyId, voto } = votoData;
+    const leyRef = doc(db, "leyes", leyId);
+    const votanteRef = doc(collection(leyRef, "votantes"), dni);
 
-// 🔹 Obtener todos los documentos de una colección
-export const getUsers = async (): Promise<User[]> => {
-  try {
-    const querySnapshot = await getDocs(collection(db, "users"));
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as User));
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    return [];
-  }
-};
+    // Verificar si la ley existe
+    const leySnap = await getDoc(leyRef);
+    if (!leySnap.exists()) {
+      await setDoc(leyRef, { votos: { aFavor: 0, enContra: 0, neutral: 0 } });
+    }
 
-// 🔹 Obtener un documento específico
-export const getUserById = async (id: string): Promise<User | null> => {
-  try {
-    const docRef = doc(db, "users", id);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? ({ id: docSnap.id, ...docSnap.data() } as User) : null;
-  } catch (error) {
-    console.error("Error al obtener usuario:", error);
-    return null;
-  }
-};
+    // Verificar si el usuario ya votó
+    const votanteSnap = await getDoc(votanteRef);
+    if (votanteSnap.exists()) {
+      console.error("El usuario ya ha votado en esta ley.");
+      return false;
+    }
 
-// 🔹 Actualizar un documento
-export const updateUser = async (id: string, newData: Partial<User>): Promise<boolean> => {
-  try {
-    const docRef = doc(db, "users", id);
-    await updateDoc(docRef, newData);
+    // Registrar el voto en la subcolección 'votantes'
+    await setDoc(votanteRef, {
+      voto,
+      timestamp: serverTimestamp(),
+    });
+
+    // Obtener nuevamente la ley después de la posible creación
+    const leyData = (await getDoc(leyRef)).data();
+    if (!leyData) {
+      console.error("No se pudo obtener los datos de la ley.");
+      return false;
+    }
+
+    // Actualizar el conteo de votos
+    const votosActualizados = {
+      aFavor: leyData.votos?.aFavor || 0,
+      enContra: leyData.votos?.enContra || 0,
+      neutral: leyData.votos?.neutral || 0,
+    };
+    votosActualizados[voto] += 1;
+
+    await updateDoc(leyRef, { votos: votosActualizados });
+
+    console.log("Voto registrado correctamente.");
     return true;
   } catch (error) {
-    console.error("Error al actualizar usuario:", error);
-    return false;
-  }
-};
-
-// 🔹 Eliminar un documento
-export const deleteUser = async (id: string): Promise<boolean> => {
-  try {
-    const docRef = doc(db, "users", id);
-    await deleteDoc(docRef);
-    return true;
-  } catch (error) {
-    console.error("Error al eliminar usuario:", error);
+    console.error("Error al registrar voto:", error);
     return false;
   }
 };

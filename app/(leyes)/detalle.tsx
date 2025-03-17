@@ -23,6 +23,7 @@ interface Firmante {
 }
 
 interface Ley {
+  pleyId: string;
   titulo: string;
   desEstado: string;
   fecPresentacion: string;
@@ -131,7 +132,14 @@ export default function DetalleLeyScreen() {
             setIsFabOpen(false);
           }}
           onVotePress={() => {
-            router.push("/(leyes)/votarLey");
+            router.push({
+              pathname: "/(leyes)/votarLey",
+              params: {
+                idLey: ley?.pleyId,
+                titulo: ley?.titulo,
+                sumilla: ley?.sumilla,
+              }
+            });
             setIsFabOpen(false);
           }}
           onToggle={setIsFabOpen}
