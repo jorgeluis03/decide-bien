@@ -44,6 +44,7 @@ const VotarLeyScreen: React.FC = () => {
     const [selectedVote, setSelectedVote] = useState<keyof Votes | null>(null);
     const [dniInfo, setDniInfo] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
     const [isEnviandoVoto, setIsEnviandoVoto] = useState(false);
     const [nombreCompleto, setNombreCompleto] = useState("");
 
@@ -51,9 +52,17 @@ const VotarLeyScreen: React.FC = () => {
     useEffect(() => {
         const fetchVoteStats = async () => {
             if (idLey) {
-                const stats = await obtenerEstadisticasVotos(idLey);
-                if (stats) {
-                    setVotes(stats);
+                try {
+                    setIsLoadingStats(true);
+                    const stats = await obtenerEstadisticasVotos(idLey);
+                    if (stats) {
+                        setVotes(stats);
+                    }
+                } catch (error) {
+                    console.error("Error al obtener estadísticas:", error);
+                    Alert.alert("Error", "No se pudieron cargar las estadísticas de votos");
+                } finally {
+                    setIsLoadingStats(false);
                 }
             }
         };
@@ -196,39 +205,47 @@ const VotarLeyScreen: React.FC = () => {
                 </ThemedView>
 
                 {/* Estadísticas de votación */}
-                <View style={styles.statsContainer}>
-                    {(["aFavor", "neutral", "enContra"] as Array<keyof Votes>).map((type) => (
-                        <View key={type} style={styles.statRow}>
-                            <Text style={styles.statLabel}>
-                                {type === "aFavor" ? "A Favor" : type === "neutral" ? "Neutral" : "En Contra"} ({votes[type]})
-                            </Text>
-                            <View style={styles.progressBarBackground}>
-                                <View
-                                    style={[
-                                        styles.progressBar,
-                                        {
-                                            width: `${parseFloat(percentage(votes[type]))}%`,
-                                            backgroundColor: colors[type]
-                                        }
-                                    ]}
-                                />
-                            </View>
-                            <Text style={styles.statPercentage}>{percentage(votes[type])}%</Text>
+                {isLoadingStats ? (
+                    <View style={styles.centered}>
+                        <ActivityIndicator size="large" color="#007AFF" />
+                    </View>
+                ) : (
+                    <>
+                        <View style={styles.statsContainer}>
+                            {(["aFavor", "neutral", "enContra"] as Array<keyof Votes>).map((type) => (
+                                <View key={type} style={styles.statRow}>
+                                    <Text style={styles.statLabel}>
+                                        {type === "aFavor" ? "A Favor" : type === "neutral" ? "Neutral" : "En Contra"} ({votes[type]})
+                                    </Text>
+                                    <View style={styles.progressBarBackground}>
+                                        <View
+                                            style={[
+                                                styles.progressBar,
+                                                {
+                                                    width: `${parseFloat(percentage(votes[type]))}%`,
+                                                    backgroundColor: colors[type]
+                                                }
+                                            ]}
+                                        />
+                                    </View>
+                                    <Text style={styles.statPercentage}>{percentage(votes[type])}%</Text>
+                                </View>
+                            ))}
                         </View>
-                    ))}
-                </View>
 
-                {/* Sección de votos */}
-                <View style={styles.voteContainer}>
-                    <TouchableOpacity
-                        style={[styles.voteButton, styles.aFavor]}
-                        onPress={handleOpenModal}
-                        activeOpacity={0.8}
-                    >
-                        <Ionicons name="thumbs-up" size={24} color="white" />
-                        <Text style={styles.voteText}>Votar</Text>
-                    </TouchableOpacity>
-                </View>
+                        {/* Sección de votos */}
+                        <View style={styles.voteContainer}>
+                            <TouchableOpacity
+                                style={[styles.voteButton, styles.aFavor]}
+                                onPress={handleOpenModal}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="thumbs-up" size={24} color="white" />
+                                <Text style={styles.voteText}>Votar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </>
+                )}
 
                 {isOpen && <View style={styles.overlay} />}
 
@@ -532,6 +549,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold"
     },
+    centered: { flex: 1, justifyContent: "center", alignItems: "center" },
 });
 
 export default VotarLeyScreen;
