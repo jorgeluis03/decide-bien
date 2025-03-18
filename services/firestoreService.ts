@@ -12,17 +12,8 @@ import {
   getDocs,
   orderBy,
   query,
-  addDoc,
 } from "firebase/firestore";
-
-//Interfaz para el voto
-interface Voto {
-  dni: string;
-  leyId: string;
-  nombreCompleto: string;
-  voto: "aFavor" | "enContra" | "neutral";
-  timestamp?: any;
-}
+import { Voto, Votes, Comentario } from "@/types";
 
 //Función para registrar un voto
 export const registrarVoto = async (votoData: Voto): Promise<{ success: boolean, errorMessage?: string }> => {
@@ -80,11 +71,6 @@ export const registrarVoto = async (votoData: Voto): Promise<{ success: boolean,
   }
 };
 
-interface Votes {
-  aFavor: number;
-  enContra: number;
-  neutral: number;
-}
 //Función para obtener los votos de una ley
 export const obtenerEstadisticasVotos = async (leyId: string): Promise<Votes | null> => {
   try {
@@ -106,19 +92,6 @@ export const obtenerEstadisticasVotos = async (leyId: string): Promise<Votes | n
     return null;
   }
 };
-
-interface Comentario {
-  id?: string;
-  leyId: string;
-  texto: string;
-  usuario: {
-    dni: string;
-    nombreCompleto: string;
-    avatar?: string;
-  };
-  fecha: Timestamp;
-  likes: number;
-}
 
 export const agregarComentario = async (comentarioData: {
   leyId: string;

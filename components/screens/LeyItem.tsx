@@ -1,16 +1,9 @@
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
+import { LeyResumen } from "@/types";
 
-interface LeyItemProps {
-  pleyNum: number;
-  desEstado: string;
-  titulo: string;
-  fecPresentacion: string;
-  autores: string;
-}
-
-export default function LeyItem({ pleyNum, desEstado, titulo, fecPresentacion, autores }: LeyItemProps) {
+export default function LeyItem({ pleyNum, desEstado, titulo, fecPresentacion, autores }: LeyResumen) {
   return (
     <Link href={`/(leyes)/detalle?id=${pleyNum}`} asChild>
       <TouchableOpacity style={styles.itemContainer}>

@@ -1,17 +1,7 @@
 import React from "react";
 import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
-import { Link } from "expo-router";
 import { ThemedText } from '@/components/ThemedText';
-
-interface Congresista {
-    id: string;
-    foto: any;
-    nombre: string;
-    edad: number;
-    profesion: string;
-    educacion: string;
-    trayectoria?: string;
-}
+import { Congresista } from '@/types';
 
 interface CongresistaItemProps {
     congresista: Congresista;

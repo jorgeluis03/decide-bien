@@ -2,16 +2,7 @@ import React from "react";
 import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { ThemedText } from '@/components/ThemedText';
-
-interface Congresista {
-    id: string;
-    foto: any;
-    nombre: string;
-    edad: number;
-    profesion: string;
-    educacion: string;
-    trayectoria?: string;
-}
+import { Congresista } from '@/types';
 
 interface CongresistaItemProps {
     congresista: Congresista;
@@ -22,7 +13,7 @@ const CongresistaItem: React.FC<CongresistaItemProps> = ({ congresista }) => {
         <View style={styles.container}>
             <View style={styles.imageContainer}>
                 <Image source={congresista.foto} style={styles.image} />
-                <Link href="#" asChild>
+                <Link href='/(leyes)/detalle' asChild>
                     <TouchableOpacity style={styles.button}>
                         <ThemedText style={styles.buttonText}>Ver más</ThemedText>
                     </TouchableOpacity>

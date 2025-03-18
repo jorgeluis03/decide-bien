@@ -15,16 +15,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useDebounce } from "../../hooks/useDebounce";
 import { fetchData } from "../../utils/fetchData";
 import {BASE_URL} from "@/constants/config";
+import { Congresista } from "@/types";
 
 const API_URL = `${BASE_URL}/api/v1/congresistas`;
 const PAGE_SIZE = 10;
-
-interface Congresista {
-    nombre: string;
-    partido: string;
-    email: string;
-    fotoUrl: string;
-}
 
 export default function CongresistasScreen() {
     const [congresistas, setCongresistas] = useState<Congresista[]>([]);

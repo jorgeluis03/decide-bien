@@ -2,18 +2,7 @@ import React from "react";
 import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
-
-interface Candidato {
-    id: string;
-    foto: any;
-    nombre: string;
-    edad: number;
-    profesion: string;
-    partido: string;
-    colorPartido?: string;
-    ideologia: string;
-    trayectoria?: string;
-}
+import { Candidato } from "@/types";
 
 interface CandidatoCardProps {
     candidato: Candidato;
