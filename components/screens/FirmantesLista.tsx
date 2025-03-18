@@ -2,15 +2,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Linking } from "react-
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { BASE_URL } from '@/constants/config';
-
-interface Firmante {
-  firmanteId: number;
-  nombre: string;
-  dni: string;
-  sexo: string;
-  pagWeb: string;
-  foto_url: string;
-}
+import { Firmante } from "@/types";
 
 interface FirmantesListProps {
   firmantes: Firmante[];

@@ -22,12 +22,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
 import { registrarVoto, obtenerEstadisticasVotos } from "@/services/firestoreService";
-
-interface Votes {
-    aFavor: number;
-    enContra: number;
-    neutral: number;
-}
+import { Votes } from "@/types";
 
 const VotarLeyScreen: React.FC = () => {
     const { idLey, titulo, sumilla } = useLocalSearchParams<{

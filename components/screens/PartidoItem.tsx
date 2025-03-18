@@ -2,22 +2,7 @@ import React from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { BASE_URL } from '@/constants/config';
-interface Personero {
-    tipo: string;
-    nombre: string;
-}
-
-interface Partido {
-    numero: string;
-    logo: string;
-    nombre: string;
-    fecha_inscripcion: string;
-    direccion: string;
-    telefonos: string;
-    web: string;
-    email: string;
-    personeros: Personero[];
-}
+import { Partido } from '@/types';
 
 interface Props {
     partido: Partido;

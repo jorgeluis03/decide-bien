@@ -12,26 +12,8 @@ import FloatingActionButton from "@/components/common/FloatingActionButton";
 import { BASE_URL } from "@/constants/config";
 import { useQuery } from "@tanstack/react-query";
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
-
-interface Firmante {
-  firmanteId: number;
-  nombre: string;
-  dni: string;
-  sexo: string;
-  pagWeb: string;
-  foto_url: string;
-}
-
-interface Ley {
-  pleyId: string;
-  titulo: string;
-  desEstado: string;
-  fecPresentacion: string;
-  desProponente: string;
-  desGpar: string;
-  sumilla: string;
-  firmantes: Firmante[];
-}
+import { LeyDetalle } from "@/types";
+import { Firmante } from "@/types";
 
 const fetchLeyDetails = async (id: string) => {
   const data = await fetchData<{ code: number; data?: { general: any; firmantes: Firmante[], seguimientos: any } }>(`${API_URL}/${id}`);
@@ -48,7 +30,7 @@ export default function DetalleLeyScreen() {
   const [isFabOpen, setIsFabOpen] = useState(false);
 
   /* CACHÉ */
-  const { data, isLoading, isError, error } = useQuery<{ ley: Ley; seguimientos: any[] }>({
+  const { data, isLoading, isError, error } = useQuery<{ ley: LeyDetalle; seguimientos: any[] }>({
     queryKey: ["ley", id],
     queryFn: () => fetchLeyDetails(id!),
     enabled: !!id,

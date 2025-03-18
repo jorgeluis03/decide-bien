@@ -20,24 +20,11 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { obtenerComentarios, agregarComentario, darLikeComentario } from "@/services/firestoreService";
-import { Timestamp } from "firebase/firestore";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
-
-// Make this interface compatible with the one in firestoreService
-interface Comentario {
-    id: string;
-    texto: string;
-    usuario: {
-        dni: string;
-        nombreCompleto: string;
-    };
-    fecha: Timestamp | Date;
-    likes: number;
-    userHasLiked?: boolean;
-}
+import { Comentario } from "@/types";
 
 const ComentariosLeyScreen: React.FC = () => {
     const { idLey, titulo } = useLocalSearchParams<{

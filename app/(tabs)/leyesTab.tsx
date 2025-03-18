@@ -20,19 +20,13 @@ import DateFilter from "@/components/screens/DateFilter";
 import LeyItem from "@/components/screens/LeyItem";
 import { BASE_URL } from "@/constants/config";
 import EstadoFilter from "@/components/screens/EstadoFilter";
-interface Ley {
-  pleyNum: number;
-  desEstado: string;
-  titulo: string;
-  fecPresentacion: string;
-  autores: string;
-}
+import { LeyResumen } from "@/types";
 
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 const PAGE_SIZE = 10;
 
 export default function LeyesTab() {
-  const [leyes, setLeyes] = useState<Ley[]>([]);
+  const [leyes, setLeyes] = useState<LeyResumen[]>([]);
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -67,7 +61,7 @@ export default function LeyesTab() {
         estadoId: estadoSeleccionado || null,
       };
 
-      const data = await fetchData<{ data: { proyectos: Ley[]; rowsTotal: number } }>(API_URL, "POST", undefined, body);
+      const data = await fetchData<{ data: { proyectos: LeyResumen[]; rowsTotal: number } }>(API_URL, "POST", undefined, body);
       const proyectos = data?.data?.proyectos || [];
       const total = data?.data?.rowsTotal || 0;
 
