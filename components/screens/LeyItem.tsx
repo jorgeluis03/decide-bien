@@ -5,7 +5,7 @@ import { LeyResumen } from "@/types";
 
 export default function LeyItem({ pleyNum, desEstado, titulo, fecPresentacion, autores }: LeyResumen) {
   return (
-    <Link href={`/(leyes)/detalle?id=${pleyNum}`} asChild>
+    <Link href={`/leyes/detalle?id=${pleyNum}`} asChild>
       <TouchableOpacity style={styles.itemContainer}>
         <ThemedText style={styles.estado}>{desEstado}</ThemedText>
         <ThemedText style={styles.titulo}>{`[${pleyNum}] ${titulo}`}</ThemedText>

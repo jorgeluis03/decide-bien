@@ -1,47 +1,40 @@
 import React from "react";
 import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
-import { ThemedText } from "@/components/ThemedText";
-import { Candidato } from "@/types";
+import { ThemedText } from '@/components/ThemedText';
+import { Congresista } from '@/types';
 
-interface CandidatoCardProps {
-    candidato: Candidato;
+interface CongresistaItemProps {
+    congresista: Congresista;
 }
 
-const CandidatoCard: React.FC<CandidatoCardProps> = ({ candidato }) => {
+const CongresistaItem: React.FC<CongresistaItemProps> = ({ congresista }) => {
     return (
         <View style={styles.container}>
             <View style={styles.imageContainer}>
-                <Image source={candidato.foto} style={styles.image} />
-                <Link href={`/(candidatos)/detalle?id=${candidato.id}`} asChild>
+                <Image source={congresista.foto} style={styles.image} />
+                <Link href='/leyes/detalle' asChild>
                     <TouchableOpacity style={styles.button}>
                         <ThemedText style={styles.buttonText}>Ver más</ThemedText>
                     </TouchableOpacity>
                 </Link>
             </View>
             <View style={styles.info}>
-                <ThemedText style={styles.name}>{candidato.nombre}</ThemedText>
+                <ThemedText style={styles.name}>{congresista.nombre}</ThemedText>
                 <View style={styles.row}>
-                    <ThemedText style={styles.detail}>🎂 {candidato.edad} años</ThemedText>
-                    <ThemedText style={styles.detail}>🎓 {candidato.profesion}</ThemedText>
+                    <ThemedText style={styles.detail}>🎂 {congresista.edad} años</ThemedText>
+                    <ThemedText style={styles.detail}>🎓 {congresista.profesion}</ThemedText>
                 </View>
-                <View style={styles.row}>
-                    <View style={[styles.badge, { backgroundColor: candidato.colorPartido || "#3498db" }]}>
-                        <ThemedText style={styles.badgeText}>{candidato.partido}</ThemedText>
-                    </View>
-                    <View style={[styles.badge, styles.ideologyBadge]}>
-                        <ThemedText style={styles.badgeText}>{candidato.ideologia}</ThemedText>
-                    </View>
-                </View>
-                {candidato.trayectoria && (
-                    <ThemedText style={styles.trayectoria}>{candidato.trayectoria}</ThemedText>
+                <ThemedText style={styles.detail}>{congresista.educacion}</ThemedText>
+                {congresista.trayectoria && (
+                    <ThemedText style={styles.trayectoria}>{congresista.trayectoria}</ThemedText>
                 )}
             </View>
         </View>
     );
 };
 
-export default CandidatoCard;
+export default CongresistaItem;
 
 const styles = StyleSheet.create({
     container: {
@@ -54,7 +47,6 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         alignItems: "center",
-        flexDirection: "column",
         marginRight: 16,
     },
     image: {
@@ -75,26 +67,12 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: "row",
         flexWrap: "wrap",
+        gap: 6,
         marginTop: 4,
     },
     detail: {
         fontSize: 14,
         color: "#555",
-        marginRight: 10, // Reemplazo de gap
-    },
-    badge: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 10,
-        marginRight: 6,
-    },
-    ideologyBadge: {
-        backgroundColor: "#FFD700",
-    },
-    badgeText: {
-        fontSize: 12,
-        fontWeight: "bold",
-        color: "#fff",
     },
     trayectoria: {
         fontSize: 13,

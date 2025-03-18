@@ -1,4 +1,4 @@
-import { db } from "../firebaseConfig";
+import { db } from "../../../firebaseConfig";
 import {
   collection,
   doc,
@@ -13,7 +13,7 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-import { Voto, Votes, Comentario } from "@/types";
+import { Voto, Votes, Comentario } from "../types";
 
 //Función para registrar un voto
 export const registrarVoto = async (votoData: Voto): Promise<{ success: boolean, errorMessage?: string }> => {
@@ -101,14 +101,24 @@ export const agregarComentario = async (comentarioData: {
   try {
     const { leyId, texto, usuario } = comentarioData;
     const leyRef = doc(db, "leyes", leyId);
-    
+
+    // Check if the ley exists, if not create it
+    const leySnap = await getDoc(leyRef);
+    if (!leySnap.exists()) {
+      // Initialize the ley document with default values
+      await setDoc(leyRef, {
+        comentariosCount: 0,
+        votos: { aFavor: 0, enContra: 0, neutral: 0 }
+      });
+    }
+
     // Use DNI as the document ID for the comment
     const comentarioRef = doc(collection(leyRef, "comentarios"), usuario.dni);
-    
+
     // Check if the user already has a comment
     const comentarioSnap = await getDoc(comentarioRef);
     const isUpdate = comentarioSnap.exists();
-    
+
     const nuevoComentario: Omit<Comentario, 'id'> = {
       leyId,
       texto,
@@ -116,17 +126,17 @@ export const agregarComentario = async (comentarioData: {
       fecha: serverTimestamp() as Timestamp,
       likes: isUpdate ? (comentarioSnap.data()?.likes || 0) : 0
     };
-    
+
     // Set the document with the DNI as the ID
     await setDoc(comentarioRef, nuevoComentario);
-    
+
     // If it's a new comment (not an update), increment the count
     if (!isUpdate) {
       await updateDoc(leyRef, {
         comentariosCount: increment(1)
       });
     }
-    
+
     return {
       success: true,
       id: usuario.dni

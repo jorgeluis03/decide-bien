@@ -19,12 +19,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { obtenerComentarios, agregarComentario, darLikeComentario } from "@/services/firestoreService";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
-import { Comentario } from "@/types";
+import { Comentario } from "@/features/leyes/types";
+import { agregarComentario, darLikeComentario, obtenerComentarios } from "@/features/leyes/services/firestoreService";
 
 const ComentariosLeyScreen: React.FC = () => {
     const { idLey, titulo } = useLocalSearchParams<{

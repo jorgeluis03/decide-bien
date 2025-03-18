@@ -13,7 +13,7 @@ import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import PartidosScreen from '../(elecciones)/partidos';
+import PartidosScreen from '../elecciones/partidos';
 
 const CandidatosScreen = () => (
   <ThemedView style={styles.screenContainer}>

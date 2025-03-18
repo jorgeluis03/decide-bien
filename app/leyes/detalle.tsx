@@ -7,13 +7,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import FirmantesLista from "@/components/screens/FirmantesLista";
 import { useRouter } from "expo-router";
-import DescargarPDFButton from "@/components/common/DescargarPDFButton";
-import FloatingActionButton from "@/components/common/FloatingActionButton";
+import { DescargarPDFButton } from "@/features/leyes/components";
 import { BASE_URL } from "@/constants/config";
 import { useQuery } from "@tanstack/react-query";
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
-import { LeyDetalle } from "@/types";
-import { Firmante } from "@/types";
+import FloatingActionButton from "@/components/ui/FloatingActionButton";
+import { Firmante, LeyDetalle } from "@/features/leyes/types";
 
 const fetchLeyDetails = async (id: string) => {
   const data = await fetchData<{ code: number; data?: { general: any; firmantes: Firmante[], seguimientos: any } }>(`${API_URL}/${id}`);
@@ -111,7 +110,7 @@ export default function DetalleLeyScreen() {
         <FloatingActionButton
           onCommentPress={() => {
             router.push({
-              pathname: "/(leyes)/comentariosLey",
+              pathname: "/leyes/comentariosLey",
               params: {
                 idLey: ley?.pleyId,
                 titulo: ley?.titulo,
@@ -121,7 +120,7 @@ export default function DetalleLeyScreen() {
           }}
           onVotePress={() => {
             router.push({
-              pathname: "/(leyes)/votarLey",
+              pathname: "/leyes/votarLey",
               params: {
                 idLey: ley?.pleyId,
                 titulo: ley?.titulo,

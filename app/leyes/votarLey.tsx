@@ -21,8 +21,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
-import { registrarVoto, obtenerEstadisticasVotos } from "@/services/firestoreService";
-import { Votes } from "@/types";
+import { obtenerEstadisticasVotos, registrarVoto } from "@/features/leyes/services/firestoreService";
+import { Votes } from "@/features/leyes/types";
 
 const VotarLeyScreen: React.FC = () => {
     const { idLey, titulo, sumilla } = useLocalSearchParams<{

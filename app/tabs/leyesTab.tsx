@@ -19,8 +19,8 @@ import { ThemedView } from "@/components/ThemedView";
 import DateFilter from "@/components/screens/DateFilter";
 import LeyItem from "@/components/screens/LeyItem";
 import { BASE_URL } from "@/constants/config";
-import EstadoFilter from "@/components/screens/EstadoFilter";
-import { LeyResumen } from "@/types";
+import { LeyResumen } from "@/features/leyes/types";
+import { EstadoFilter } from "@/features/leyes/components";
 
 const API_URL = `${BASE_URL}/api/v1/leyes/proyectos`;
 const PAGE_SIZE = 10;
