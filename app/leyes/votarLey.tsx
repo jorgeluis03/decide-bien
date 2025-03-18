@@ -11,7 +11,9 @@ import {
     Alert,
     ScrollView,
     ActivityIndicator,
-    Keyboard
+    Keyboard,
+    LayoutAnimation,
+    KeyboardAvoidingView
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -21,9 +23,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
-import { obtenerEstadisticasVotos, registrarVoto } from "@/features/leyes/services/firestoreService";
 import { Votes } from "@/features/leyes/types";
-
+import { VotosService } from "@/features/leyes/services/votosService";
 const VotarLeyScreen: React.FC = () => {
     const { idLey, titulo, sumilla } = useLocalSearchParams<{
         idLey: string;
@@ -49,7 +50,7 @@ const VotarLeyScreen: React.FC = () => {
             if (idLey) {
                 try {
                     setIsLoadingStats(true);
-                    const stats = await obtenerEstadisticasVotos(idLey);
+                    const stats = await VotosService.obtenerEstadisticas(idLey);
                     if (stats) {
                         setVotes(stats);
                     }
@@ -78,11 +79,29 @@ const VotarLeyScreen: React.FC = () => {
         sheetRef.current?.snapToIndex(0);
     }, []);
 
+    const handleSheetChanges = useCallback((index: number) => {
+        // Si el índice es -1, significa que el BottomSheet se ha cerrado completamente
+        if (index === -1) {
+            // Resetea la UI
+            if (Platform.OS === 'ios') {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            }
+        }
+    }, []);
+
     const handleCloseModal = useCallback(() => {
+        Keyboard.dismiss();
         setIsOpen(false);
         setDni("");
         setSelectedVote(null);
         setDniInfo(null);
+
+        setTimeout(() => {
+            // En iOS esto ayudará a forzar que el layout se recalcule
+            if (Platform.OS === 'ios') {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            }
+        }, 100);
     }, []);
 
     const handleValidateDNI = useCallback(async () => {
@@ -114,7 +133,7 @@ const VotarLeyScreen: React.FC = () => {
             };
 
             // Registrar el voto en Firestore
-            const result = await registrarVoto(votoData);
+            const result = await VotosService.registrar(votoData);
             if (result.success) {
                 Alert.alert("Voto registrado", "¡Gracias por participar en la votación!");
                 setVotes((prevVotes) => ({
@@ -176,36 +195,46 @@ const VotarLeyScreen: React.FC = () => {
 
     return (
         <GestureHandlerRootView style={styles.flex}>
-            <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
-                {/* Header */}
-                <ThemedView style={styles.header}>
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    >
-                        <Ionicons name="arrow-back" size={24} color="black" />
-                    </TouchableOpacity>
-                </ThemedView>
+            <KeyboardAvoidingView
+                style={styles.flex}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+            >
+                <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }]}>
+                    {/* Header */}
+                    <ThemedView style={styles.header}>
+                        <TouchableOpacity
+                            onPress={() => router.back()}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                            <Ionicons name="arrow-back" size={24} color="black" />
+                        </TouchableOpacity>
+                    </ThemedView>
 
-                <ThemedText style={styles.title}>¿Qué opinas sobre esta ley?</ThemedText>
+                    <ThemedText style={styles.title}>¿Qué opinas sobre esta ley?</ThemedText>
 
-                {/* Información de la ley */}
-                <ThemedView style={styles.leyInfoContainer}>
-                    <ThemedText style={styles.leyTitulo} numberOfLines={2}>
-                        {titulo}
-                    </ThemedText>
-                    <ThemedText style={styles.leySumilla}>
-                        {sumilla}
-                    </ThemedText>
-                </ThemedView>
+                    {/* Información de la ley */}
+                    <ThemedView style={styles.leyInfoContainer}>
+                        <ThemedText style={styles.leyTitulo} numberOfLines={2}>
+                            {titulo}
+                        </ThemedText>
+                        <ThemedText style={styles.leySumilla}>
+                            {sumilla}
+                        </ThemedText>
+                    </ThemedView>
 
-                {/* Estadísticas de votación */}
-                {isLoadingStats ? (
-                    <View style={styles.centered}>
-                        <ActivityIndicator size="large" color="#007AFF" />
-                    </View>
-                ) : (
-                    <>
+                    {/* Estadísticas de votación */}
+                    {isLoadingStats ? (
+                        <View style={styles.centered}>
+                            <ActivityIndicator size="large" color="#007AFF" />
+                        </View>
+                    ) : totalVotes === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="bar-chart-outline" size={60} color="#ccc" />
+                            <Text style={styles.emptyText}>No hay votos todavía</Text>
+                            <Text style={styles.emptySubtext}>Sé el primero en votar sobre esta ley</Text>
+                        </View>
+                    ) : (
                         <View style={styles.statsContainer}>
                             {(["aFavor", "neutral", "enContra"] as Array<keyof Votes>).map((type) => (
                                 <View key={type} style={styles.statRow}>
@@ -227,103 +256,102 @@ const VotarLeyScreen: React.FC = () => {
                                 </View>
                             ))}
                         </View>
+                    )}
 
-                        {/* Sección de votos */}
-                        <View style={styles.voteContainer}>
-                            <TouchableOpacity
-                                style={[styles.voteButton, styles.aFavor]}
-                                onPress={handleOpenModal}
-                                activeOpacity={0.8}
-                            >
-                                <Ionicons name="thumbs-up" size={24} color="white" />
-                                <Text style={styles.voteText}>Votar</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </>
-                )}
-
-                {isOpen && <View style={styles.overlay} />}
-
-                {/* BottomSheet para ingresar DNI */}
-                {isOpen && (
-                    <BottomSheet
-                        ref={sheetRef}
-                        snapPoints={snapPoints}
-                        enablePanDownToClose={true}
-                        onClose={handleCloseModal}
-                        index={0}
-                        keyboardBehavior="interactive"
+                    {/* Floating Action Button (FAB) para votar */}
+                    <TouchableOpacity
+                        style={styles.fab}
+                        onPress={handleOpenModal}
+                        activeOpacity={0.8}
                     >
-                        <BottomSheetView style={styles.bottomSheetContentContainer}>
-                            <ScrollView
-                                style={{ width: '100%' }}
-                                contentContainerStyle={{ alignItems: 'center' }}
-                                showsVerticalScrollIndicator={false}
-                                keyboardShouldPersistTaps="handled"
-                            >
-                                <Text style={styles.bottomSheetTitle}>Confirma tu voto</Text>
-                                <Text style={styles.bottomSheetText}>Ingrese su DNI para validar su voto:</Text>
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Ingrese su DNI"
-                                        keyboardType="numeric"
-                                        maxLength={8}
-                                        value={dni}
-                                        onChangeText={setDni}
-                                        autoFocus
-                                    />
-                                    <TouchableOpacity onPress={handleSearchDNI} disabled={isLoading}>
-                                        {isLoading ? (
-                                            <ActivityIndicator size="small" color="#007AFF" />
-                                        ) : (
-                                            <Ionicons name="search" size={24} color="black" />
-                                        )}
-                                    </TouchableOpacity>
-                                </View>
+                        <Ionicons name="thumbs-up" size={24} color="white" />
+                    </TouchableOpacity>
 
-                                {dniInfo && (
-                                    <ThemedView style={styles.dniInfoContainer}>
-                                        <ThemedText style={styles.dniInfoText}>{dniInfo}</ThemedText>
-                                    </ThemedView>
-                                )}
+                    {isOpen && <View style={styles.overlay} />}
 
-                                <Text style={styles.selectOptionText}>Seleccione una opción:</Text>
+                    {/* BottomSheet para ingresar DNI */}
+                    {isOpen && (
+                        <BottomSheet
+                            ref={sheetRef}
+                            snapPoints={snapPoints}
+                            enablePanDownToClose={true}
+                            onClose={handleCloseModal}
+                            onChange={handleSheetChanges}
+                            index={0}
+                            keyboardBehavior="interactive"
+                            android_keyboardInputMode="adjustResize"
+                        >
+                            <BottomSheetView style={styles.bottomSheetContentContainer}>
+                                <ScrollView
+                                    style={{ width: '100%' }}
+                                    contentContainerStyle={{ alignItems: 'center' }}
+                                    showsVerticalScrollIndicator={false}
+                                    keyboardShouldPersistTaps="handled"
+                                >
+                                    <Text style={styles.bottomSheetTitle}>Confirma tu voto</Text>
+                                    <Text style={styles.bottomSheetText}>Ingrese su DNI para validar su voto:</Text>
+                                    <View style={styles.inputContainer}>
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder="Ingrese su DNI"
+                                            keyboardType="numeric"
+                                            maxLength={8}
+                                            value={dni}
+                                            onChangeText={setDni}
+                                            autoFocus
+                                        />
+                                        <TouchableOpacity onPress={handleSearchDNI} disabled={isLoading}>
+                                            {isLoading ? (
+                                                <ActivityIndicator size="small" color="#007AFF" />
+                                            ) : (
+                                                <Ionicons name="search" size={24} color="black" />
+                                            )}
+                                        </TouchableOpacity>
+                                    </View>
 
-                                <View style={styles.voteContainer}>
-                                    {renderVoteOption("aFavor", "thumbs-up", "A Favor")}
-                                    {renderVoteOption("neutral", "remove-circle", "Neutral")}
-                                    {renderVoteOption("enContra", "thumbs-down", "En Contra")}
-                                </View>
+                                    {dniInfo && (
+                                        <ThemedView style={styles.dniInfoContainer}>
+                                            <ThemedText style={styles.dniInfoText}>{dniInfo}</ThemedText>
+                                        </ThemedView>
+                                    )}
 
-                                <View style={styles.bottomSheetButtons}>
-                                    <TouchableOpacity
-                                        style={[styles.bottomSheetButton, styles.cancelButton]}
-                                        onPress={handleCloseModal}
-                                    >
-                                        <Text style={styles.cancelButtonText}>Cancelar</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.bottomSheetButton,
-                                            styles.confirmButton,
-                                            !selectedVote || dni.length !== 8 ? styles.disabledButton : {}
-                                        ]}
-                                        onPress={handleValidateDNI}
-                                        disabled={!selectedVote || dni.length !== 8}
-                                    >
-                                        {isEnviandoVoto ? (
-                                            <ActivityIndicator size="small" color="white" />
-                                        ) : (
-                                            <Text style={styles.confirmButtonText}>Confirmar</Text>
-                                        )}
-                                    </TouchableOpacity>
-                                </View>
-                            </ScrollView>
-                        </BottomSheetView>
-                    </BottomSheet>
-                )}
-            </SafeAreaView>
+                                    <Text style={styles.selectOptionText}>Seleccione una opción:</Text>
+
+                                    <View style={styles.voteContainer}>
+                                        {renderVoteOption("aFavor", "thumbs-up", "A Favor")}
+                                        {renderVoteOption("neutral", "remove-circle", "Neutral")}
+                                        {renderVoteOption("enContra", "thumbs-down", "En Contra")}
+                                    </View>
+
+                                    <View style={styles.bottomSheetButtons}>
+                                        <TouchableOpacity
+                                            style={[styles.bottomSheetButton, styles.cancelButton]}
+                                            onPress={handleCloseModal}
+                                        >
+                                            <Text style={styles.cancelButtonText}>Cancelar</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.bottomSheetButton,
+                                                styles.confirmButton,
+                                                !selectedVote || dni.length !== 8 ? styles.disabledButton : {}
+                                            ]}
+                                            onPress={handleValidateDNI}
+                                            disabled={!selectedVote || dni.length !== 8}
+                                        >
+                                            {isEnviandoVoto ? (
+                                                <ActivityIndicator size="small" color="white" />
+                                            ) : (
+                                                <Text style={styles.confirmButtonText}>Confirmar</Text>
+                                            )}
+                                        </TouchableOpacity>
+                                    </View>
+                                </ScrollView>
+                            </BottomSheetView>
+                        </BottomSheet>
+                    )}
+                </SafeAreaView>
+            </KeyboardAvoidingView>
         </GestureHandlerRootView>
     );
 };
@@ -545,6 +573,42 @@ const styles = StyleSheet.create({
         fontWeight: "bold"
     },
     centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 60,
+    },
+    emptyText: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#666",
+        marginTop: 10,
+    },
+    emptySubtext: {
+        fontSize: 14,
+        color: "#999",
+        marginTop: 5,
+        textAlign: "center",
+        paddingHorizontal: 20,
+    },
+    fab: {
+        position: 'absolute',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: colors.aFavor,
+        alignItems: 'center',
+        justifyContent: 'center',
+        right: 30,
+        bottom: 30,
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+    },
+
 });
 
 export default VotarLeyScreen;

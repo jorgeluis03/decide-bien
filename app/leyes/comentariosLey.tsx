@@ -24,7 +24,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { fetchData } from "@/utils/fetchData";
 import { BASE_URL } from "@/constants/config";
 import { Comentario } from "@/features/leyes/types";
-import { agregarComentario, darLikeComentario, obtenerComentarios } from "@/features/leyes/services/firestoreService";
+import { ComentariosService } from "@/features/leyes/services/comentariosService";
 
 const ComentariosLeyScreen: React.FC = () => {
     const { idLey, titulo } = useLocalSearchParams<{
@@ -119,7 +119,7 @@ const ComentariosLeyScreen: React.FC = () => {
                 }
             };
 
-            const result = await agregarComentario(comentarioData);
+            const result = await ComentariosService.agregar(comentarioData);
 
             if (result.success) {
                 // Verificar si el comentario ya existe en la lista
@@ -182,7 +182,7 @@ const ComentariosLeyScreen: React.FC = () => {
 
             try {
                 setCargando(true);
-                const comentariosData = await obtenerComentarios(idLey);
+                const comentariosData = await ComentariosService.obtenerTodos(idLey);
 
                 // Transform the data to match the component's expected format
                 const formattedComentarios = comentariosData.map(comment => ({
@@ -208,7 +208,7 @@ const ComentariosLeyScreen: React.FC = () => {
 
         try {
             // Call the Firestore service to like/unlike comment
-            const success = await darLikeComentario(idLey, id, usuario.dni);
+            const success = await ComentariosService.darLike(idLey, id, usuario.dni);
 
             if (success) {
                 // Update local state
