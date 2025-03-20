@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  Image, 
-  Platform, 
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Platform,
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator
@@ -41,17 +41,17 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('@/assets/images/logo.png')} 
+            <Image
+              source={require('@/assets/images/logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -88,14 +88,14 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setSecureTextEntry(!secureTextEntry)}
                 style={styles.eyeIcon}
               >
-                <Ionicons 
-                  name={secureTextEntry ? "eye-outline" : "eye-off-outline"} 
-                  size={20} 
-                  color={Colors.common.secondaryText} 
+                <Ionicons
+                  name={secureTextEntry ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color={Colors.common.secondaryText}
                 />
               </TouchableOpacity>
             </View>
@@ -106,7 +106,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             {/* Login Button */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.button}
               onPress={handleLogin}
               disabled={isLoading}
@@ -121,7 +121,7 @@ export default function LoginScreen() {
             {/* Register Link */}
             <View style={styles.footer}>
               <ThemedText style={styles.footerText}>¿No tienes cuenta?</ThemedText>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/auth/register')}>
                 <ThemedText style={styles.footerLink}> Regístrate</ThemedText>
               </TouchableOpacity>
             </View>

@@ -22,11 +22,13 @@ function AuthenticationGuard({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Si está en una ruta de autenticación (login, register, verifyCode), permitir la navegación
+    const isAuthRoute = pathname.startsWith('/auth/');
     const isLoginScreen = pathname === '/auth/login';
 
     if (!isLoading) {
-      // Si no está autenticado, redirija INMEDIATAMENTE a login a menos que ya esté allí
-      if (!isAuthenticated && !isLoginScreen) {
+      // Solo redirija a login si no está autenticado Y no está ya en una ruta de auth
+      if (!isAuthenticated && !isAuthRoute) {
         console.log('No autenticado, redirigiendo a login');
         router.replace('/auth/login');
       } else if (isAuthenticated && isLoginScreen) {

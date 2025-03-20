@@ -17,6 +17,24 @@ export default function AuthLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen name="register"
+          options={{
+            title: 'Registro',
+            headerTitleStyle: {
+              fontWeight: 'medium',
+            },
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen name="verifyCode"
+          options={{
+            title: 'Verificación',
+            headerTitleStyle: {
+              fontWeight: 'medium',
+            },
+            headerShown: false,
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
