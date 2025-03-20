@@ -1,129 +1,165 @@
-import {
-    PhoneAuthProvider,
-    signInWithCredential,
-    PhoneMultiFactorGenerator,
-    RecaptchaVerifier,
-    signOut as firebaseSignOut,
-    onAuthStateChanged,
-    updateProfile
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebaseConfig';
-import { User } from '../../types/AuthState';
-import { Platform } from 'react-native';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  updateProfile as firebaseUpdateProfile,
+  sendPasswordResetEmail,
+  User as FirebaseUser
+} from "firebase/auth";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../../firebaseConfig";
+import { User } from "../../types/AuthState";
 
 export class AuthService {
-    // Iniciar el proceso de autenticación con teléfono
-    static async requestPhoneVerification(
-        phoneNumber: string,
-        recaptchaVerifier: RecaptchaVerifier | null
-    ): Promise<string> {
-        try {
-            if (Platform.OS === 'web' && !recaptchaVerifier) {
-                throw new Error('Recaptcha verifier is required for web platform');
-            }
-
-            const provider = new PhoneAuthProvider(auth);
-
-            // Para web se necesita recaptcha, para móvil no es necesario
-            let verificationId;
-            if (Platform.OS === 'web' && recaptchaVerifier) {
-                verificationId = await provider.verifyPhoneNumber(phoneNumber, recaptchaVerifier);
-            } else {
-                verificationId = await provider.verifyPhoneNumber(phoneNumber);
-            }
-
-            return verificationId;
-        } catch (error: any) {
-            console.error('Error en solicitud de verificación telefónica:', error);
-            throw new Error(error.message || 'Error al solicitar verificación telefónica');
-        }
+  /**
+   * Registra un nuevo usuario con correo y contraseña
+   */
+  static async registerWithEmailAndPassword(
+    email: string,
+    password: string,
+    displayName: string
+  ): Promise<User> {
+    try {
+      console.log("AuthService: Registrando usuario", email);
+      
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Actualizar el nombre de usuario
+      await firebaseUpdateProfile(firebaseUser, { displayName });
+      
+      // Crear objeto de usuario para nuestro estado
+      const user: User = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: displayName,
+        phoneNumber: null,
+        photoURL: null,
+        providerId: 'password',
+        isAnonymous: false,
+        createdAt: Date.now(),
+        lastLoginAt: Date.now()
+      };
+      
+      // Crear en Firestore
+      await setDoc(doc(db, 'users', firebaseUser.uid), user);
+      
+      return user;
+    } catch (error: any) {
+      console.error('Error en registerWithEmailAndPassword:', error);
+      
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('Este correo ya está registrado');
+      } else if (error.code === 'auth/weak-password') {
+        throw new Error('La contraseña debe tener al menos 6 caracteres');
+      } else {
+        throw error;
+      }
     }
+  }
 
-    // Verificar código SMS e iniciar sesión
-    static async verifyPhoneCode(
-        verificationId: string,
-        verificationCode: string
-    ): Promise<User | null> {
-        try {
-            const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
-            const userCredential = await signInWithCredential(auth, credential);
-
-            if (!userCredential.user) return null;
-
-            // Mapear el usuario de Firebase a nuestro modelo de usuario
-            const userData: User = {
-                uid: userCredential.user.uid,
-                phoneNumber: userCredential.user.phoneNumber,
-                displayName: userCredential.user.displayName,
-                photoURL: userCredential.user.photoURL,
-                email: userCredential.user.email,
-                providerId: userCredential.user.providerId,
-                isAnonymous: userCredential.user.isAnonymous,
-            };
-
-            // Obtener datos adicionales del perfil desde Firestore o crear si no existe
-            const userDoc = await getDoc(doc(db, 'users', userData.uid));
-
-            if (userDoc.exists()) {
-                // Actualizar último inicio de sesión
-                await updateDoc(doc(db, 'users', userData.uid), {
-                    lastLoginAt: serverTimestamp(),
-                });
-
-                return {
-                    ...userData,
-                    ...userDoc.data() as Partial<User>,
-                };
-            } else {
-                // Crear nuevo perfil
-                const newUserData = {
-                    ...userData,
-                    createdAt: Date.now(),
-                    lastLoginAt: Date.now(),
-                };
-
-                await setDoc(doc(db, 'users', userData.uid), newUserData);
-                return newUserData;
-            }
-        } catch (error: any) {
-            console.error('Error en verificación de código:', error);
-            throw new Error(error.message || 'Error al verificar código');
-        }
+  /**
+   * Inicia sesión con correo y contraseña
+   */
+  static async signInWithEmailAndPassword(
+    email: string,
+    password: string
+  ): Promise<User> {
+    try {
+      console.log("AuthService: Iniciando sesión", email);
+      
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Obtener datos adicionales de Firestore
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      let userData: User;
+      
+      if (userDoc.exists()) {
+        userData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          phoneNumber: firebaseUser.phoneNumber,
+          photoURL: firebaseUser.photoURL,
+          providerId: 'password',
+          isAnonymous: false,
+          ...userDoc.data() as Partial<User>
+        };
+      } else {
+        userData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          phoneNumber: firebaseUser.phoneNumber,
+          photoURL: firebaseUser.photoURL,
+          providerId: 'password',
+          isAnonymous: false,
+          createdAt: Date.now(),
+          lastLoginAt: Date.now()
+        };
+        
+        // Crear en Firestore si no existe
+        await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+      }
+      
+      return userData;
+    } catch (error: any) {
+      console.error('Error en signInWithEmailAndPassword:', error);
+      
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        throw new Error('Correo o contraseña incorrectos');
+      } else {
+        throw error;
+      }
     }
+  }
 
-    // Cerrar sesión
-    static async signOut(): Promise<void> {
-        return firebaseSignOut(auth);
+  /**
+   * Envía un correo para restablecer la contraseña
+   */
+  static async sendPasswordReset(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error: any) {
+      console.error('Error en sendPasswordReset:', error);
+      
+      if (error.code === 'auth/user-not-found') {
+        throw new Error('No hay ninguna cuenta asociada a este correo');
+      } else {
+        throw error;
+      }
     }
+  }
 
-    // Actualizar perfil de usuario
-    static async updateUserProfile(
-        uid: string,
-        userData: Partial<User>
-    ): Promise<void> {
-        try {
-            const userRef = doc(db, 'users', uid);
-
-            // Actualizar en Firestore
-            await updateDoc(userRef, {
-                ...userData,
-                updatedAt: serverTimestamp(),
-            });
-
-            // Si hay displayName o photoURL, actualizar también en Auth
-            if (userData.displayName || userData.photoURL) {
-                const currentUser = auth.currentUser;
-                if (currentUser) {
-                    await updateProfile(currentUser, {
-                        displayName: userData.displayName || currentUser.displayName,
-                        photoURL: userData.photoURL || currentUser.photoURL,
-                    });
-                }
-            }
-        } catch (error: any) {
-            console.error('Error al actualizar perfil:', error);
-            throw new Error(error.message || 'Error al actualizar perfil');
-        }
+  /**
+   * Actualiza el perfil del usuario
+   */
+  static async updateUserProfile(userId: string, userData: Partial<User>): Promise<void> {
+    try {
+      console.log("AuthService: Actualizando perfil para", userId);
+      await updateDoc(doc(db, 'users', userId), {
+        ...userData,
+        updatedAt: Date.now()
+      });
+      console.log("AuthService: Perfil actualizado");
+    } catch (error) {
+      console.error('Error en updateUserProfile:', error);
+      throw error;
     }
+  }
+
+  /**
+   * Cierra la sesión actual
+   */
+  static async signOut(): Promise<void> {
+    try {
+      console.log("AuthService: Cerrando sesión");
+      await firebaseSignOut(auth);
+      console.log("AuthService: Sesión cerrada");
+    } catch (error) {
+      console.error('Error en signOut:', error);
+      throw error;
+    }
+  }
 }

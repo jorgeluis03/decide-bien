@@ -3,7 +3,8 @@ import { useFonts } from 'expo-font';
 import { Slot, useRouter, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import { View, ActivityIndicator, Text } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -20,30 +21,66 @@ function AuthenticationGuard({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [hasHandledInitialAuth, setHasHandledInitialAuth] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Determinar si estamos en una ruta de autenticación
+  const isAuthRoute = pathname.startsWith('/auth/');
+  const isLoginScreen = pathname === '/auth/login';
 
   useEffect(() => {
-    // Si está en una ruta de autenticación (login, register, verifyCode), permitir la navegación
-    const isAuthRoute = pathname.startsWith('/auth/');
-    const isLoginScreen = pathname === '/auth/login';
+    // Solo realizar la redirección si no estamos ya redirigiendo y la autenticación se ha cargado
+    if (!isLoading && !isRedirecting && !hasHandledInitialAuth) {
+      let shouldRedirect = false;
+      let redirectPath: '/auth/login' | '/tabs' = '/auth/login';
 
-    if (!isLoading) {
-      // Solo redirija a login si no está autenticado Y no está ya en una ruta de auth
       if (!isAuthenticated && !isAuthRoute) {
         console.log('No autenticado, redirigiendo a login');
-        router.replace('/auth/login');
+        shouldRedirect = true;
+        redirectPath = '/auth/login';
       } else if (isAuthenticated && isLoginScreen) {
-        // Si está autenticado pero está en la pantalla de login, redirigir a tabs
         console.log('Autenticado, redirigiendo a tabs');
-        router.replace('/tabs');
+        shouldRedirect = true;
+        redirectPath = '/tabs';
+      }
+
+      if (shouldRedirect) {
+        // Establecer flags antes de redirigir para prevenir redirecciones múltiples
+        setIsRedirecting(true);
+        setHasHandledInitialAuth(true);
+
+        // Usar setTimeout para dejar que React complete el ciclo de renderizado actual
+        setTimeout(() => {
+          router.replace(redirectPath);
+          // Después de un tiempo, permitir futuras redirecciones si la ruta cambia
+          setTimeout(() => {
+            setIsRedirecting(false);
+          }, 1000);
+        }, 100);
+      } else {
+        setHasHandledInitialAuth(true);
       }
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [isAuthenticated, isLoading, pathname, router, isAuthRoute, isLoginScreen, hasHandledInitialAuth, isRedirecting]);
 
-  if (isLoading) {
-    return null;
+  // Si la ruta cambia después de la autenticación inicial, podemos permitir nuevas verificaciones
+  useEffect(() => {
+    if (hasHandledInitialAuth && !isRedirecting) {
+      setHasHandledInitialAuth(false);
+    }
+  }, [pathname]);
+
+  // Mostrar indicador de carga solo durante la carga inicial y no cuando ya estamos redirigiendo
+  if (isLoading && !isAuthRoute && !isRedirecting) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={{ marginTop: 10 }}>Verificando sesión...</Text>
+      </View>
+    );
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 export default function RootLayout() {

@@ -1,118 +1,165 @@
 import { useState, useEffect, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 import { AuthService } from '../services/firebase/AuthService';
 import { useAuthStore } from '../services/firebase/useAuthStore';
 import { User } from '../types/AuthState';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function useAuth() {
+    // Obtener estado del store
     const {
         user,
         isLoading,
         error,
-        verificationId,
         isAuthenticated,
         setUser,
         setLoading,
         setError,
-        setVerificationId,
         signOut,
         updateUserProfile
     } = useAuthStore();
 
+    // Listen for auth state changes when component mounts
     useEffect(() => {
+        console.log("useAuth effect ejecutándose");
         setLoading(true);
-
-        // Escuchar cambios en el estado de autenticación
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            try {
-                if (firebaseUser) {
-                    // Usuario autenticado, obtener datos de Firestore
-                    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-
-                    if (userDoc.exists()) {
-                        // Combinar datos de Auth y Firestore
-                        const userData: User = {
-                            uid: firebaseUser.uid,
-                            phoneNumber: firebaseUser.phoneNumber,
-                            displayName: firebaseUser.displayName,
-                            photoURL: firebaseUser.photoURL,
-                            email: firebaseUser.email,
-                            providerId: firebaseUser.providerId,
-                            isAnonymous: firebaseUser.isAnonymous,
-                            ...userDoc.data() as Partial<User>
-                        };
-
-                        setUser(userData);
-                    } else {
-                        // Usuario existe en Auth pero no en Firestore
-                        const basicUserData: User = {
-                            uid: firebaseUser.uid,
-                            phoneNumber: firebaseUser.phoneNumber,
-                            displayName: firebaseUser.displayName,
-                            photoURL: firebaseUser.photoURL,
-                            email: firebaseUser.email,
-                            providerId: firebaseUser.providerId,
-                            isAnonymous: firebaseUser.isAnonymous,
-                        };
-
-                        setUser(basicUserData);
-                    }
-                } else {
-                    // No hay usuario autenticado
-                    setUser(null);
-                }
-            } catch (err: any) {
-                console.error('Error loading user data:', err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        });
-
-        // Limpiar suscripción al desmontar
-        return () => unsubscribe();
-    }, []);
-
-    const requestPhoneVerification = useCallback(async (phoneNumber: string, recaptchaVerifier: any = null) => {
-        setLoading(true);
-        setError(null);
 
         try {
-            const id = await AuthService.requestPhoneVerification(phoneNumber, recaptchaVerifier);
-            setVerificationId(id);
-            return id;
+            // Escuchar cambios en el estado de autenticación
+            const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+                try {
+                    console.log("AuthStateChanged ejecutándose", firebaseUser ? "Usuario autenticado" : "No autenticado");
+                    if (firebaseUser) {
+                        // Usuario autenticado, obtener datos de Firestore
+                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+
+                        if (userDoc.exists()) {
+                            // Combinar datos de Auth y Firestore
+                            const userData: User = {
+                                uid: firebaseUser.uid,
+                                phoneNumber: firebaseUser.phoneNumber,
+                                displayName: firebaseUser.displayName,
+                                photoURL: firebaseUser.photoURL,
+                                email: firebaseUser.email,
+                                providerId: firebaseUser.providerId || 'password',
+                                isAnonymous: firebaseUser.isAnonymous,
+                                ...userDoc.data() as Partial<User>
+                            };
+
+                            setUser(userData);
+
+                            // Actualizar timestamp de último login
+                            try {
+                                await setDoc(doc(db, 'users', firebaseUser.uid), {
+                                    lastLoginAt: serverTimestamp()
+                                }, { merge: true });
+                            } catch (error) {
+                                console.warn('Error updating lastLoginAt:', error);
+                            }
+                        } else {
+                            // Usuario existe en Auth pero no en Firestore, crear documento
+                            const basicUserData: User = {
+                                uid: firebaseUser.uid,
+                                phoneNumber: firebaseUser.phoneNumber,
+                                displayName: firebaseUser.displayName,
+                                photoURL: firebaseUser.photoURL,
+                                email: firebaseUser.email,
+                                providerId: firebaseUser.providerId || 'password',
+                                isAnonymous: firebaseUser.isAnonymous,
+                                createdAt: Date.now(),
+                                lastLoginAt: Date.now()
+                            };
+
+                            // Crear documento en Firestore
+                            try {
+                                await setDoc(doc(db, 'users', firebaseUser.uid), basicUserData);
+                            } catch (error) {
+                                console.error('Error creating user document:', error);
+                            }
+
+                            setUser(basicUserData);
+                        }
+                    } else {
+                        // No hay usuario autenticado
+                        setUser(null);
+                    }
+                } catch (err: any) {
+                    console.error('Error loading user data:', err);
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            // Limpiar suscripción al desmontar
+            return () => {
+                console.log("Limpiando suscripción de auth");
+                unsubscribe();
+            };
         } catch (err: any) {
-            setError(err.message);
-            throw err;
-        } finally {
+            console.error("Error crítico en useAuth:", err);
+            setError(err.message || "Error en la autenticación");
             setLoading(false);
         }
-    }, []);
+    }, [setUser, setLoading, setError]);
 
-    const verifyPhoneCode = useCallback(async (code: string) => {
-        if (!verificationId) {
-            setError('No hay verificación en curso');
-            return null;
-        }
-
+    /**
+     * Registra un nuevo usuario con correo y contraseña
+     */
+    const registerWithEmailAndPassword = useCallback(async (
+        email: string, 
+        password: string, 
+        displayName: string,
+        dni: string
+    ) => {
         setLoading(true);
         setError(null);
 
         try {
-            const user = await AuthService.verifyPhoneCode(verificationId, code);
+            const user = await AuthService.registerWithEmailAndPassword(email, password, displayName);
+            
+            // Actualizar con datos adicionales como DNI
+            await AuthService.updateUserProfile(user.uid, {
+                dni,
+                profileComplete: false
+            });
+            
             setUser(user);
-            setVerificationId(null);
             return user;
         } catch (err: any) {
-            setError(err.message);
+            console.error('Registration error:', err);
+            setError(err.message || 'Error al registrar usuario');
             throw err;
         } finally {
             setLoading(false);
         }
-    }, [verificationId]);
+    }, [setLoading, setError, setUser]);
 
+    /**
+     * Inicia sesión con correo y contraseña
+     */
+    const signInWithEmailAndPassword = useCallback(async (email: string, password: string) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const user = await AuthService.signInWithEmailAndPassword(email, password);
+            setUser(user);
+            return user;
+        } catch (err: any) {
+            console.error('Sign in error:', err);
+            setError(err.message || 'Error al iniciar sesión');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, [setLoading, setError, setUser]);
+
+    /**
+     * Cierra la sesión del usuario actual
+     */
     const logout = useCallback(async () => {
         setLoading(true);
 
@@ -120,16 +167,22 @@ export function useAuth() {
             await AuthService.signOut();
             signOut(); // Actualiza el estado local
         } catch (err: any) {
-            setError(err.message);
+            console.error('Logout error:', err);
+            setError(err.message || 'Error al cerrar sesión');
+            throw err;
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [setLoading, setError, signOut]);
 
+    /**
+     * Actualiza el perfil del usuario actual
+     */
     const updateProfile = useCallback(async (userData: Partial<User>) => {
         if (!user) {
-            setError('Usuario no autenticado');
-            return;
+            const error = 'Usuario no autenticado';
+            setError(error);
+            throw new Error(error);
         }
 
         setLoading(true);
@@ -138,22 +191,75 @@ export function useAuth() {
             await AuthService.updateUserProfile(user.uid, userData);
             updateUserProfile(userData);
         } catch (err: any) {
-            setError(err.message);
+            console.error('Profile update error:', err);
+            setError(err.message || 'Error al actualizar perfil');
             throw err;
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, [user, setLoading, setError, updateUserProfile]);
+
+    /**
+     * Obtiene los datos actualizados del usuario
+     */
+    const refreshUserData = useCallback(async () => {
+        if (!user) {
+            return null;
+        }
+
+        setLoading(true);
+
+        try {
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+            if (userDoc.exists()) {
+                const refreshedData = {
+                    ...user,
+                    ...userDoc.data() as Partial<User>
+                };
+
+                setUser(refreshedData);
+                return refreshedData;
+            }
+
+            return user;
+        } catch (err: any) {
+            console.error('Error refreshing user data:', err);
+            setError(err.message || 'Error al obtener datos del usuario');
+            return user;
+        } finally {
+            setLoading(false);
+        }
+    }, [user, setLoading, setError, setUser]);
+
+    /**
+     * Envía un correo para restablecer la contraseña
+     */
+    const sendPasswordReset = useCallback(async (email: string) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            await AuthService.sendPasswordReset(email);
+        } catch (err: any) {
+            console.error('Password reset error:', err);
+            setError(err.message || 'Error al enviar correo de restablecimiento');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, [setLoading, setError]);
 
     return {
         user,
         isLoading,
         error,
         isAuthenticated,
-        verificationId,
-        requestPhoneVerification,
-        verifyPhoneCode,
+        registerWithEmailAndPassword,
+        signInWithEmailAndPassword,
         logout,
-        updateProfile
+        updateProfile,
+        refreshUserData,
+        sendPasswordReset
     };
 }

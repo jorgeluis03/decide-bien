@@ -26,9 +26,9 @@ export default function AuthLayout() {
             headerShown: false,
           }}
         />
-        <Stack.Screen name="verifyCode"
+        <Stack.Screen name="forgotPassword"
           options={{
-            title: 'Verificación',
+            title: 'forgotPassword',
             headerTitleStyle: {
               fontWeight: 'medium',
             },

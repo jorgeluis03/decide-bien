@@ -8,7 +8,8 @@ import {
     Platform,
     KeyboardAvoidingView,
     ScrollView,
-    ActivityIndicator
+    ActivityIndicator,
+    Alert
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,42 +17,59 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function RegisterScreen() {
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
     const [dni, setDni] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { registerWithEmailAndPassword } = useAuth();
 
     const handleRegister = async () => {
-        if (!phoneNumber || !name || !dni) {
-            alert('Por favor, completa todos los campos.');
+        if (!email || !password || !name || !dni) {
+            Alert.alert('Error', 'Por favor, completa todos los campos.');
             return;
         }
 
         if (dni.length !== 8 || isNaN(Number(dni))) {
-            alert('El DNI debe tener 8 dígitos numéricos.');
+            Alert.alert('Error', 'El DNI debe tener 8 dígitos numéricos.');
             return;
         }
 
-        if (!phoneNumber.startsWith('+51') || phoneNumber.length !== 12) {
-            alert('Ingresa un número válido con formato +51XXXXXXXXX');
+        if (password !== confirmPassword) {
+            Alert.alert('Error', 'Las contraseñas no coinciden.');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres.');
             return;
         }
 
         setIsLoading(true);
-        // Esta función se implementará con Firebase
-        // Aquí solo es un placeholder para el diseño
-        setTimeout(() => {
+
+        try {
+            // Registrar usuario con email y contraseña
+            await registerWithEmailAndPassword(email, password, name, dni);
+
+            // Cambiar aquí: Navegar directamente a completar perfil
+            router.replace('/auth/completeProfile');
+        } catch (error) {
+            console.error('Error during registration:', error);
+            Alert.alert('Error: No se pudo registrar. Por favor, intenta de nuevo.');
+        } finally {
             setIsLoading(false);
-            router.push('/auth/verifyCode');
-        }, 1500);
+        }
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar style="dark" />
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -79,7 +97,7 @@ export default function RegisterScreen() {
 
                     <View style={styles.formSection}>
                         <ThemedText style={styles.title}>Crear cuenta</ThemedText>
-                        <ThemedText style={styles.subtitle}>Te enviaremos un código de verificación</ThemedText>
+                        <ThemedText style={styles.subtitle}>Ingresa tus datos para registrarte</ThemedText>
 
                         {/* Nombre completo Input */}
                         <View style={styles.inputContainer}>
@@ -108,18 +126,43 @@ export default function RegisterScreen() {
                             />
                         </View>
 
-                        {/* Phone Input */}
+                        {/* Email Input */}
                         <View style={styles.inputContainer}>
-                            <Ionicons name="call-outline" size={20} color={Colors.common.secondaryText} />
-                            <ThemedText style={styles.countryCode}>+51</ThemedText>
+                            <Ionicons name="mail-outline" size={20} color={Colors.common.secondaryText} />
                             <TextInput
-                                style={styles.phoneInput}
-                                placeholder="Número de teléfono"
+                                style={styles.input}
+                                placeholder="Correo electrónico"
                                 placeholderTextColor={Colors.common.secondaryText}
-                                keyboardType="phone-pad"
-                                value={phoneNumber.replace('+51', '')}
-                                onChangeText={(text) => setPhoneNumber('+51' + text)}
-                                maxLength={9}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                value={email}
+                                onChangeText={setEmail}
+                            />
+                        </View>
+
+                        {/* Password Input */}
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="lock-closed-outline" size={20} color={Colors.common.secondaryText} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Contraseña"
+                                placeholderTextColor={Colors.common.secondaryText}
+                                secureTextEntry={true}
+                                value={password}
+                                onChangeText={setPassword}
+                            />
+                        </View>
+
+                        {/* Confirm Password Input */}
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="lock-closed-outline" size={20} color={Colors.common.secondaryText} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Confirmar contraseña"
+                                placeholderTextColor={Colors.common.secondaryText}
+                                secureTextEntry={true}
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
                             />
                         </View>
 
