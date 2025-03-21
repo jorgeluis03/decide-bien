@@ -1,14 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 import { AuthService } from '../services/firebase/AuthService';
 import { useAuthStore } from '../services/firebase/useAuthStore';
 import { User } from '../types/AuthState';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SessionService } from '@/services/firebase/SessionService';
+
+let authListenerInitialized = false;
 
 export function useAuth() {
-    // Obtener estado del store
+    console.log("Hook useAuth cargado");
+
+    const [isInitialized, setIsInitialized] = useState(false);
     const {
         user,
         isLoading,
@@ -21,96 +25,57 @@ export function useAuth() {
         updateUserProfile
     } = useAuthStore();
 
-    // Listen for auth state changes when component mounts
     useEffect(() => {
-        console.log("useAuth effect ejecutándose");
+        if (authListenerInitialized) {
+            setIsInitialized(true);
+            return;
+        }
+
+        console.log("Inicializando auth listener");
+        authListenerInitialized = true;
         setLoading(true);
 
-        try {
-            // Escuchar cambios en el estado de autenticación
-            const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-                try {
-                    console.log("AuthStateChanged ejecutándose", firebaseUser ? "Usuario autenticado" : "No autenticado");
-                    if (firebaseUser) {
-                        // Usuario autenticado, obtener datos de Firestore
-                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            try {
+                if (firebaseUser) {
+                    console.log("Auth state changed: Autenticado");
 
-                        if (userDoc.exists()) {
-                            // Combinar datos de Auth y Firestore
-                            const userData: User = {
-                                uid: firebaseUser.uid,
-                                phoneNumber: firebaseUser.phoneNumber,
-                                displayName: firebaseUser.displayName,
-                                photoURL: firebaseUser.photoURL,
-                                email: firebaseUser.email,
-                                providerId: firebaseUser.providerId || 'password',
-                                isAnonymous: firebaseUser.isAnonymous,
-                                ...userDoc.data() as Partial<User>
-                            };
+                    setUser({
+                        uid: firebaseUser.uid,
+                        email: firebaseUser.email,
+                        displayName: firebaseUser.displayName,
+                        phoneNumber: firebaseUser.phoneNumber,
+                        photoURL: firebaseUser.photoURL,
+                        providerId: firebaseUser.providerId,
+                        isAnonymous: firebaseUser.isAnonymous,
+                    });
 
-                            setUser(userData);
-
-                            // Actualizar timestamp de último login
-                            try {
-                                await setDoc(doc(db, 'users', firebaseUser.uid), {
-                                    lastLoginAt: serverTimestamp()
-                                }, { merge: true });
-                            } catch (error) {
-                                console.warn('Error updating lastLoginAt:', error);
-                            }
-                        } else {
-                            // Usuario existe en Auth pero no en Firestore, crear documento
-                            const basicUserData: User = {
-                                uid: firebaseUser.uid,
-                                phoneNumber: firebaseUser.phoneNumber,
-                                displayName: firebaseUser.displayName,
-                                photoURL: firebaseUser.photoURL,
-                                email: firebaseUser.email,
-                                providerId: firebaseUser.providerId || 'password',
-                                isAnonymous: firebaseUser.isAnonymous,
-                                createdAt: Date.now(),
-                                lastLoginAt: Date.now()
-                            };
-
-                            // Crear documento en Firestore
-                            try {
-                                await setDoc(doc(db, 'users', firebaseUser.uid), basicUserData);
-                            } catch (error) {
-                                console.error('Error creating user document:', error);
-                            }
-
-                            setUser(basicUserData);
-                        }
-                    } else {
-                        // No hay usuario autenticado
-                        setUser(null);
-                    }
-                } catch (err: any) {
-                    console.error('Error loading user data:', err);
-                    setError(err.message);
-                } finally {
-                    setLoading(false);
+                    await SessionService.updateLastActive();
+                } else {
+                    console.log("Auth state changed: No autenticado");
+                    setUser(null);
                 }
-            });
+            } catch (error) {
+                console.error("Error en el listener de autenticación:", error);
+                setError("Error al gestionar el estado de autenticación");
+            } finally {
+                setLoading(false);
+                setIsInitialized(true);
+            }
+        });
 
-            // Limpiar suscripción al desmontar
-            return () => {
-                console.log("Limpiando suscripción de auth");
-                unsubscribe();
-            };
-        } catch (err: any) {
-            console.error("Error crítico en useAuth:", err);
-            setError(err.message || "Error en la autenticación");
-            setLoading(false);
-        }
-    }, [setUser, setLoading, setError]);
+        return () => {
+            console.log("Limpiando auth listener");
+            unsubscribe();
+        };
+    }, []);
 
     /**
      * Registra un nuevo usuario con correo y contraseña
      */
     const registerWithEmailAndPassword = useCallback(async (
-        email: string, 
-        password: string, 
+        email: string,
+        password: string,
         displayName: string,
         dni: string
     ) => {
@@ -119,13 +84,13 @@ export function useAuth() {
 
         try {
             const user = await AuthService.registerWithEmailAndPassword(email, password, displayName);
-            
+
             // Actualizar con datos adicionales como DNI
             await AuthService.updateUserProfile(user.uid, {
                 dni,
                 profileComplete: false
             });
-            
+
             setUser(user);
             return user;
         } catch (err: any) {
@@ -158,16 +123,29 @@ export function useAuth() {
     }, [setLoading, setError, setUser]);
 
     /**
-     * Cierra la sesión del usuario actual
-     */
+ * Cierra la sesión del usuario actual
+ */
     const logout = useCallback(async () => {
+        console.log("Iniciando proceso de logout");
         setLoading(true);
 
         try {
+            // 1. Limpiar datos de sesión local primero
+            console.log("1. Limpiando sesión local");
+            await SessionService.clearSession();
+
+            // 2. Cerrar sesión en Firebase Auth
+            console.log("2. Cerrando sesión en Firebase");
             await AuthService.signOut();
-            signOut(); // Actualiza el estado local
+
+            // 3. Actualizar el estado local al final
+            console.log("3. Actualizando estado de la aplicación");
+            signOut(); // Esta es la función del store
+
+            console.log("Logout completado con éxito");
+            return true;
         } catch (err: any) {
-            console.error('Logout error:', err);
+            console.error('Error detallado al cerrar sesión:', err);
             setError(err.message || 'Error al cerrar sesión');
             throw err;
         } finally {
@@ -255,9 +233,26 @@ export function useAuth() {
         isLoading,
         error,
         isAuthenticated,
+        isInitialized,
         registerWithEmailAndPassword,
-        signInWithEmailAndPassword,
+        signInWithEmailAndPassword: async (email: string, password: string) => {
+            try {
+                setLoading(true);
+                setError(null);
+                console.log(`AuthService: Iniciando sesión ${email}`);
+                await AuthService.signInWithEmailAndPassword(email, password);
+                // No es necesario actualizar el estado, lo hará el auth listener
+            } catch (error: any) {
+                console.error("Error en login:", error);
+                setError(error.message || 'Error al iniciar sesión');
+                throw error;
+            } finally {
+                setLoading(false);
+            }
+        },
+
         logout,
+
         updateProfile,
         refreshUserData,
         sendPasswordReset

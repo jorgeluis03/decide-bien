@@ -1,10 +1,9 @@
-import { initializeApp, getApp, getApps, FirebaseApp } from 'firebase/app';
-import { initializeAuth, Auth, getAuth, getReactNativePersistence } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { getAuth, initializeAuth, getReactNativePersistence, Auth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Firebase configuration
-export const firebaseConfig = {
+import { Platform } from 'react-native';
+const firebaseConfig = {
   apiKey: "AIzaSyC03vrMgRl3BwQGuEYSzHN5Zxf9JvpXohc",
   authDomain: "decide-bien.firebaseapp.com",
   projectId: "decide-bien",
@@ -14,32 +13,29 @@ export const firebaseConfig = {
   measurementId: "G-2Y3JZWMJ8R"
 };
 
-// Initialize Firebase
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
+console.log("Initializing Firebase app for the first time");
+const app = initializeApp(firebaseConfig);
 
-try {
-  if (!getApps().length) {
-    console.log("Initializing Firebase app for the first time");
-    app = initializeApp(firebaseConfig);
-    
-    // Inicializar Auth con persistencia para React Native
+let auth: Auth;
+
+if (Platform.OS === 'web') {
+  auth = getAuth(app);
+} else {
+  try {
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage)
     });
-    
-    db = getFirestore(app);
-  } else {
-    console.log("Firebase app already initialized, getting instance");
-    app = getApp();
+    console.log("Firebase Auth initialized with persistence");
+  } catch (error) {
+    console.warn("Error initializing auth with persistence, falling back to default:", error);
     auth = getAuth(app);
-    db = getFirestore(app);
   }
-  
-  console.log("Firebase initialized successfully");
-} catch (error) {
-  console.error("Error initializing Firebase:", error);
 }
 
-export { auth, db };
+console.log("Firebase Auth initialized successfully");
+
+const db = getFirestore(app);
+
+console.log("Firebase initialized successfully");
+
+export { app, auth, db };

@@ -11,71 +11,58 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
-// Evita que la splash screen se oculte antes de que se carguen los assets
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-// Componente para proteger rutas
 function AuthenticationGuard({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isInitialized, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [hasHandledInitialAuth, setHasHandledInitialAuth] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [redirected, setRedirected] = useState(false);
 
-  // Determinar si estamos en una ruta de autenticación
   const isAuthRoute = pathname.startsWith('/auth/');
-  const isLoginScreen = pathname === '/auth/login';
 
   useEffect(() => {
-    // Solo realizar la redirección si no estamos ya redirigiendo y la autenticación se ha cargado
-    if (!isLoading && !isRedirecting && !hasHandledInitialAuth) {
-      let shouldRedirect = false;
-      let redirectPath: '/auth/login' | '/tabs' = '/auth/login';
+    if (!isInitialized || redirected) return;
+
+    const timer = setTimeout(() => {
+      const state = {
+        isAuthenticated,
+        pathname,
+        isAuthRoute,
+        userExists: !!user
+      };
+      console.log('AuthGuard - Estado actual:', state);
 
       if (!isAuthenticated && !isAuthRoute) {
         console.log('No autenticado, redirigiendo a login');
-        shouldRedirect = true;
-        redirectPath = '/auth/login';
-      } else if (isAuthenticated && isLoginScreen) {
-        console.log('Autenticado, redirigiendo a tabs');
-        shouldRedirect = true;
-        redirectPath = '/tabs';
+        router.replace('/auth/login');
+        setRedirected(true);
+      } else if (isAuthenticated && isAuthRoute && pathname !== '/auth/completeProfile') {
+        console.log('Autenticado, redirigiendo a home');
+
+        if (user && !user.profileComplete && pathname !== '/auth/completeProfile') {
+          router.replace('/auth/completeProfile');
+        } else {
+          router.replace('/tabs');
+        }
+        setRedirected(true);
       }
+    }, 100);
 
-      if (shouldRedirect) {
-        // Establecer flags antes de redirigir para prevenir redirecciones múltiples
-        setIsRedirecting(true);
-        setHasHandledInitialAuth(true);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, isInitialized, pathname, router, user, redirected]);
 
-        // Usar setTimeout para dejar que React complete el ciclo de renderizado actual
-        setTimeout(() => {
-          router.replace(redirectPath);
-          // Después de un tiempo, permitir futuras redirecciones si la ruta cambia
-          setTimeout(() => {
-            setIsRedirecting(false);
-          }, 1000);
-        }, 100);
-      } else {
-        setHasHandledInitialAuth(true);
-      }
-    }
-  }, [isAuthenticated, isLoading, pathname, router, isAuthRoute, isLoginScreen, hasHandledInitialAuth, isRedirecting]);
-
-  // Si la ruta cambia después de la autenticación inicial, podemos permitir nuevas verificaciones
   useEffect(() => {
-    if (hasHandledInitialAuth && !isRedirecting) {
-      setHasHandledInitialAuth(false);
-    }
+    setRedirected(false);
   }, [pathname]);
 
-  // Mostrar indicador de carga solo durante la carga inicial y no cuando ya estamos redirigiendo
-  if (isLoading && !isAuthRoute && !isRedirecting) {
+  if (!isInitialized || isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 10 }}>Verificando sesión...</Text>
+        <Text style={{ marginTop: 10 }}>Iniciando aplicación...</Text>
       </View>
     );
   }

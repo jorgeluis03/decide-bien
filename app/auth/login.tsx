@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
+import { SessionService } from '@/services/firebase/SessionService';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -28,14 +29,12 @@ export default function LoginScreen() {
   const [ready, setReady] = useState(false);
   const router = useRouter();
 
-  // Envolverlo en un try/catch por si el hook falla
   let authHook;
   try {
     authHook = useAuth();
     console.log("Hook useAuth cargado correctamente");
   } catch (err) {
     console.error('Error al cargar useAuth:', err);
-    // En caso de error, proporcionar un objeto vacío con las funciones necesarias
     authHook = {
       isLoading: false,
       error: "Error al cargar la autenticación",
@@ -43,7 +42,6 @@ export default function LoginScreen() {
     };
   }
 
-  // Destructuramos de forma segura, proporcionando valores por defecto
   const {
     signInWithEmailAndPassword = async () => Promise.reject("Servicio no disponible"),
     error: authError
@@ -53,7 +51,6 @@ export default function LoginScreen() {
     console.log('LoginScreen montado');
     setReady(true);
 
-    // Si hay un error de autenticación, mostrarlo
     if (authError) {
       setError(authError);
     }
@@ -64,36 +61,46 @@ export default function LoginScreen() {
   }, [authError]);
 
   const handleLogin = async () => {
-    if (!signInWithEmailAndPassword) {
-      setError('Servicio de autenticación no disponible');
-      return;
-    }
-
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor, ingresa tu correo y contraseña');
+      setError('Por favor, ingresa tu correo y contraseña');
       return;
     }
-
+  
     setIsLoading(true);
     setError(null);
-
+  
     try {
-      console.log('Iniciando login con:', email);
-
-      // Iniciar sesión con email y contraseña
-      await signInWithEmailAndPassword(email, password);
-
-      // Redirigir directamente a la app principal
-      router.replace('/tabs');
+      console.log(`Iniciando login con: ${email}`);
+      const userData = await signInWithEmailAndPassword(email, password);
+      
+      await SessionService.updateLastActive(userData);
+            
     } catch (error: any) {
       console.error('Error de login:', error);
-      setError(error?.message || 'Error al iniciar sesión. Intenta nuevamente.');
+      
+      let errorMessage = 'Error al iniciar sesión. Intenta nuevamente.';
+      
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            errorMessage = 'Correo electrónico o contraseña incorrectos';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Demasiados intentos fallidos. Intenta más tarde.';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = 'Problema de conexión. Verifica tu internet.';
+            break;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Si no está listo, mostrar un indicador de carga
   if (!ready) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]}>
