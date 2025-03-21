@@ -7,6 +7,10 @@ interface EstadoFilterProps {
 
 const estados = [
     {
+        "estadoId": null,
+        "desEstado": "TODO",
+    },
+    {
         "estadoId": 1,
         "desEstado": "PRESENTADO",
     },
@@ -77,9 +81,9 @@ const estados = [
 ];
 
 export default function EstadoFilter({ onEstadoChange }: EstadoFilterProps) {
-    const [selectedEstado, setSelectedEstado] = useState<number | null>(1);
+    const [selectedEstado, setSelectedEstado] = useState<number | null>(null);
 
-    const toggleEstado = (estadoId: number) => {
+    const toggleEstado = (estadoId: number | null) => {
         const newEstado = selectedEstado === estadoId ? null : estadoId;
         setSelectedEstado(newEstado);
         onEstadoChange(newEstado);

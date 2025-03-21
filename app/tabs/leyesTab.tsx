@@ -36,7 +36,7 @@ export default function LeyesTab() {
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [estadoSeleccionado, setEstadoSeleccionado] = useState<number | null>(1);
+  const [estadoSeleccionado, setEstadoSeleccionado] = useState<number | null>(null);
 
   const debouncedQuery = useDebounce(query, 500);
   const fadeAnim = useState(new Animated.Value(0))[0];
