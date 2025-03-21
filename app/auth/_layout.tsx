@@ -26,6 +26,15 @@ export default function AuthLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen name="completeProfile"
+          options={{
+            title: 'Completar Perfil',
+            headerTitleStyle: {
+              fontWeight: 'medium',
+            },
+            headerShown: false,
+          }}
+        />
         <Stack.Screen name="forgotPassword"
           options={{
             title: 'forgotPassword',

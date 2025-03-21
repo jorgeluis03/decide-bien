@@ -13,7 +13,6 @@ const firebaseConfig = {
   measurementId: "G-2Y3JZWMJ8R"
 };
 
-console.log("Initializing Firebase app for the first time");
 const app = initializeApp(firebaseConfig);
 
 let auth: Auth;
@@ -32,10 +31,5 @@ if (Platform.OS === 'web') {
   }
 }
 
-console.log("Firebase Auth initialized successfully");
-
 const db = getFirestore(app);
-
-console.log("Firebase initialized successfully");
-
 export { app, auth, db };

@@ -9,7 +9,8 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     ActivityIndicator,
-    Alert
+    Alert,
+    Text
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,8 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchData } from '@/utils/fetchData';
+import { BASE_URL } from '@/constants/config';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -26,8 +29,37 @@ export default function RegisterScreen() {
     const [name, setName] = useState('');
     const [dni, setDni] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isValidatingDni, setIsValidatingDni] = useState(false);
+    const [nameAutoCompleted, setNameAutoCompleted] = useState(false);
     const router = useRouter();
     const { registerWithEmailAndPassword } = useAuth();
+
+    const handleValidateDNI = async () => {
+        if (dni.length !== 8 || isNaN(Number(dni))) {
+            Alert.alert('Error', 'El DNI debe tener 8 dígitos numéricos.');
+            return;
+        }
+
+        setIsValidatingDni(true);
+
+        try {
+            const response = await fetchData<any>(`${BASE_URL}/api/v1/consulta-dni?dni=${dni}`);
+            if (response) {
+                const nombreCompleto = `${response.nombres} ${response.apellidoPaterno} ${response.apellidoMaterno}`;
+                setName(nombreCompleto);
+                setNameAutoCompleted(true); // Marca que el nombre se ha autocompletado
+            } else {
+                setName("");
+                setNameAutoCompleted(false);
+            }
+        } catch (error) {
+            console.error('Error al validar DNI:', error);
+            setName("");
+            setNameAutoCompleted(false);
+        } finally {
+            setIsValidatingDni(false);
+        }
+    };
 
     const handleRegister = async () => {
         if (!email || !password || !name || !dni) {
@@ -99,19 +131,6 @@ export default function RegisterScreen() {
                         <ThemedText style={styles.title}>Crear cuenta</ThemedText>
                         <ThemedText style={styles.subtitle}>Ingresa tus datos para registrarte</ThemedText>
 
-                        {/* Nombre completo Input */}
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="person-outline" size={20} color={Colors.common.secondaryText} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Nombre completo"
-                                placeholderTextColor={Colors.common.secondaryText}
-                                autoCapitalize="words"
-                                value={name}
-                                onChangeText={setName}
-                            />
-                        </View>
-
                         {/* DNI Input */}
                         <View style={styles.inputContainer}>
                             <Ionicons name="card-outline" size={20} color={Colors.common.secondaryText} />
@@ -124,6 +143,33 @@ export default function RegisterScreen() {
                                 value={dni}
                                 onChangeText={setDni}
                             />
+                            <TouchableOpacity onPress={handleValidateDNI} disabled={isValidatingDni}>
+                                {isValidatingDni ? (
+                                    <ActivityIndicator size="small" color="#007AFF" />
+                                ) : (
+                                    <Ionicons name="search" size={24} color={Colors.common.secondaryText} />
+                                )}
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Nombre completo Input */}
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="person-outline" size={20} color={Colors.common.secondaryText} />
+                            <TextInput
+                                style={[
+                                    styles.input,
+                                    nameAutoCompleted && { color: '#666' } // Color más oscuro para mostrar que está deshabilitado
+                                ]}
+                                placeholder="Nombre completo"
+                                placeholderTextColor={Colors.common.secondaryText}
+                                autoCapitalize="words"
+                                value={name}
+                                onChangeText={nameAutoCompleted ? undefined : setName} // Deshabilita la edición si está autocompletado
+                                editable={!nameAutoCompleted} // Hace que el campo no sea editable
+                            />
+                            {nameAutoCompleted && (
+                                <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+                            )}
                         </View>
 
                         {/* Email Input */}

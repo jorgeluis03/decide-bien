@@ -19,8 +19,6 @@ export class AuthService {
     displayName: string
   ): Promise<User> {
     try {
-      console.log("AuthService: Registrando usuario", email);
-
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
@@ -61,7 +59,6 @@ export class AuthService {
    * Inicia sesión con correo y contraseña
    */
   static async signInWithEmailAndPassword(email: string, password: string) {
-    console.log(`AuthService: Iniciando sesión ${email}`);
     try {
       const userCredential = await firebaseSignIn(auth, email, password);
       return userCredential.user;
@@ -93,12 +90,10 @@ export class AuthService {
    */
   static async updateUserProfile(userId: string, userData: Partial<User>): Promise<void> {
     try {
-      console.log("AuthService: Actualizando perfil para", userId);
       await updateDoc(doc(db, 'users', userId), {
         ...userData,
         updatedAt: Date.now()
       });
-      console.log("AuthService: Perfil actualizado");
     } catch (error) {
       console.error('Error en updateUserProfile:', error);
       throw error;

@@ -32,7 +32,6 @@ export default function LoginScreen() {
   let authHook;
   try {
     authHook = useAuth();
-    console.log("Hook useAuth cargado correctamente");
   } catch (err) {
     console.error('Error al cargar useAuth:', err);
     authHook = {
@@ -48,7 +47,6 @@ export default function LoginScreen() {
   } = authHook || {};
 
   useEffect(() => {
-    console.log('LoginScreen montado');
     setReady(true);
 
     if (authError) {
@@ -56,7 +54,6 @@ export default function LoginScreen() {
     }
 
     return () => {
-      console.log('LoginScreen desmontado');
     };
   }, [authError]);
 
@@ -65,21 +62,20 @@ export default function LoginScreen() {
       setError('Por favor, ingresa tu correo y contraseña');
       return;
     }
-  
+
     setIsLoading(true);
     setError(null);
-  
+
     try {
-      console.log(`Iniciando login con: ${email}`);
-      const userData = await signInWithEmailAndPassword(email, password);
-      
-      await SessionService.updateLastActive(userData);
-            
+      await signInWithEmailAndPassword(email, password);
+      setTimeout(() => {
+        router.replace('/tabs');
+      }, 500);
     } catch (error: any) {
       console.error('Error de login:', error);
-      
+
       let errorMessage = 'Error al iniciar sesión. Intenta nuevamente.';
-      
+
       if (error.code) {
         switch (error.code) {
           case 'auth/user-not-found':
@@ -94,7 +90,7 @@ export default function LoginScreen() {
             break;
         }
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);

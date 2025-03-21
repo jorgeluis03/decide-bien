@@ -62,7 +62,7 @@ function AuthenticationGuard({ children }: { children: ReactNode }) {
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#007AFF" />
         <Text style={{ marginTop: 10 }}>Iniciando aplicación...</Text>
-    </View>
+      </View>
     );
   }
 
@@ -74,7 +74,7 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  
+
   const onLayoutRootView = useCallback(async () => {
     if (loaded) {
       // Only hide splash screen from here if we're not handling it elsewhere

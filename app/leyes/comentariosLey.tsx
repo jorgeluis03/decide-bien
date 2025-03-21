@@ -12,7 +12,6 @@ import {
     Alert,
     ActivityIndicator,
     KeyboardAvoidingView,
-    ScrollView,
     Keyboard
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,11 +19,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { fetchData } from "@/utils/fetchData";
-import { BASE_URL } from "@/constants/config";
 import { Comentario } from "@/features/leyes/types";
 import { ComentariosService } from "@/features/leyes/services/comentariosService";
+import { useAuth } from "@/hooks/useAuth";
 
 const ComentariosLeyScreen: React.FC = () => {
     const { idLey, titulo } = useLocalSearchParams<{
@@ -32,148 +29,12 @@ const ComentariosLeyScreen: React.FC = () => {
         titulo: string;
     }>();
 
-    const sheetRef = useRef<BottomSheet>(null);
-    const [isOpen, setIsOpen] = useState(false);
-    const [dni, setDni] = useState("");
-    const [dniInfo, setDniInfo] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [nombreCompleto, setNombreCompleto] = useState("");
+    const { user } = useAuth();
     const router = useRouter();
     const [comentarios, setComentarios] = useState<Comentario[]>([]);
     const [nuevoComentario, setNuevoComentario] = useState("");
     const [cargando, setCargando] = useState(true);
     const [enviando, setEnviando] = useState(false);
-    const [isEnviandoComentario, setIsEnviandoComentario] = useState(false);
-
-    const snapPoints = useMemo(() => ["70%"], []);
-
-    const handleOpenModal = useCallback(() => {
-        if (!nuevoComentario.trim()) {
-            Alert.alert("Error", "Escribe un comentario antes de enviar");
-            return;
-        }
-        setIsOpen(true);
-        sheetRef.current?.snapToIndex(0);
-    }, [nuevoComentario]);
-
-    const handleCloseModal = useCallback(() => {
-        setIsOpen(false);
-        setDni("");
-        setDniInfo(null);
-    }, []);
-
-    const handleSearchDNI = useCallback(async () => {
-        if (dni.length !== 8 || isNaN(Number(dni))) {
-            Alert.alert("Error", "Ingrese un DNI válido para buscar.");
-            return;
-        }
-
-        Keyboard.dismiss();
-        setIsLoading(true);
-        setDniInfo(null);
-
-        try {
-            const response = await fetchData<any>(`${BASE_URL}/api/v1/consulta-dni?dni=${dni}`);
-            if (response) {
-                const nombreCompleto = `${response.nombres} ${response.apellidoPaterno} ${response.apellidoMaterno}`;
-                setNombreCompleto(nombreCompleto);
-                setDniInfo(`Nombres: ${response.nombres}\nApellidos: ${response.apellidoPaterno} ${response.apellidoMaterno}\nCódigo de Verificación: ${response.codigoVerificacion}`);
-            } else {
-                setDniInfo("No se encontró información para este DNI");
-                setNombreCompleto("");
-            }
-        } catch (error) {
-            setDniInfo("Error al consultar el DNI. Intente nuevamente.");
-            setNombreCompleto("");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [dni]);
-
-    const handleValidateDNI = useCallback(async () => {
-        if (dni.length !== 8 || isNaN(Number(dni))) {
-            Alert.alert("Error", "Ingrese un DNI válido de 8 dígitos.");
-            return;
-        }
-
-        if (!nombreCompleto) {
-            Alert.alert("Error", "Debe validar su DNI antes de comentar.");
-            return;
-        }
-
-        if (!nuevoComentario.trim() || !idLey) {
-            Alert.alert("Error", "El comentario no puede estar vacío.");
-            return;
-        }
-
-        Keyboard.dismiss();
-        setIsEnviandoComentario(true);
-
-        try {
-            const comentarioData = {
-                leyId: idLey,
-                texto: nuevoComentario,
-                usuario: {
-                    dni: dni,
-                    nombreCompleto: nombreCompleto
-                }
-            };
-
-            const result = await ComentariosService.agregar(comentarioData);
-
-            if (result.success) {
-                // Verificar si el comentario ya existe en la lista
-                const comentarioExistente = comentarios.find(c => c.id === dni);
-
-                if (comentarioExistente) {
-                    // Actualizar el comentario existente
-                    setComentarios(prevComentarios =>
-                        prevComentarios.map(c =>
-                            c.id === dni
-                                ? {
-                                    ...c,
-                                    texto: nuevoComentario,
-                                    fecha: new Date()
-                                }
-                                : c
-                        )
-                    );
-                } else {
-                    // Agregar el nuevo comentario al estado local
-                    const nuevoComentarioObj: Comentario = {
-                        id: dni,
-                        texto: nuevoComentario,
-                        usuario: {
-                            dni: dni,
-                            nombreCompleto: nombreCompleto
-                        },
-                        fecha: new Date(),
-                        likes: 0,
-                        userHasLiked: false
-                    };
-
-                    setComentarios(prevComentarios => [nuevoComentarioObj, ...prevComentarios]);
-                }
-
-                setNuevoComentario("");
-                handleCloseModal();
-                Alert.alert("Éxito", "Tu comentario ha sido registrado correctamente.");
-            } else {
-                Alert.alert("Error", result.errorMessage || "No se pudo enviar el comentario");
-            }
-        } catch (error) {
-            console.error("Error al enviar comentario:", error);
-            Alert.alert("Error", "No se pudo enviar el comentario");
-        } finally {
-            setIsEnviandoComentario(false);
-        }
-    }, [dni, nombreCompleto, idLey, nuevoComentario, comentarios, handleCloseModal]);
-
-    // Using dni to align with Firestore service requirements
-    const usuario = {
-        dni: "12345678", // Default value, will be replaced with the validated DNI
-        nombreCompleto: "Usuario Anónimo"
-    };
 
     // Cargar comentarios al iniciar
     useEffect(() => {
@@ -184,11 +45,11 @@ const ComentariosLeyScreen: React.FC = () => {
                 setCargando(true);
                 const comentariosData = await ComentariosService.obtenerTodos(idLey);
 
-                // Transform the data to match the component's expected format
+                // Verificar si el usuario ha dado like a algún comentario
                 const formattedComentarios = comentariosData.map(comment => ({
                     ...comment,
                     id: comment.id || "",
-                    userHasLiked: false // Default value, should be updated based on user's likes
+                    userHasLiked: false // Por ahora lo dejamos en false, pero podríamos implementar una verificación real
                 }));
 
                 setComentarios(formattedComentarios);
@@ -203,12 +64,106 @@ const ComentariosLeyScreen: React.FC = () => {
         cargarComentarios();
     }, [idLey]);
 
-    const handleLikeComentario = useCallback(async (id: string) => {
-        if (!idLey) return;
+    const handleEnviarComentario = useCallback(async () => {
+        if (!nuevoComentario.trim() || !idLey) {
+            Alert.alert("Error", "El comentario no puede estar vacío.");
+            return;
+        }
+
+        if (!user) {
+            Alert.alert(
+                "Iniciar Sesión",
+                "Necesitas iniciar sesión para comentar",
+                [
+                    { text: "Cancelar", style: "cancel" },
+                    { text: "Iniciar Sesión", onPress: () => router.push("/auth/login") }
+                ]
+            );
+            return;
+        }
+
+        Keyboard.dismiss();
+        setEnviando(true);
 
         try {
+            const comentarioData = {
+                leyId: idLey,
+                texto: nuevoComentario,
+                usuario: {
+                    dni: user.dni || user.uid, // Usar uid como respaldo si no hay dni
+                    nombreCompleto: user.displayName || "Usuario"
+                }
+            };
+
+            const result = await ComentariosService.agregar(comentarioData);
+
+            if (result.success) {
+                // Verificar si el comentario ya existe en la lista
+                const userId = user.dni || user.uid;
+                const comentarioExistente = comentarios.find(c => c.id === userId);
+
+                if (comentarioExistente) {
+                    // Actualizar el comentario existente
+                    setComentarios(prevComentarios =>
+                        prevComentarios.map(c =>
+                            c.id === userId
+                                ? {
+                                    ...c,
+                                    texto: nuevoComentario,
+                                    fecha: new Date()
+                                }
+                                : c
+                        )
+                    );
+                } else {
+                    // Agregar el nuevo comentario al estado local
+                    const nuevoComentarioObj: Comentario = {
+                        id: userId,
+                        texto: nuevoComentario,
+                        usuario: {
+                            dni: userId,
+                            nombreCompleto: user.displayName || "Usuario"
+                        },
+                        fecha: new Date(),
+                        likes: 0,
+                        userHasLiked: false
+                    };
+
+                    setComentarios(prevComentarios => [nuevoComentarioObj, ...prevComentarios]);
+                }
+
+                setNuevoComentario("");
+                Alert.alert("Comentario publicado", "Tu comentario ha sido registrado correctamente.");
+            } else {
+                Alert.alert("Error", result.errorMessage || "No se pudo enviar el comentario");
+            }
+        } catch (error) {
+            console.error("Error al enviar comentario:", error);
+            Alert.alert("Error", "No se pudo enviar el comentario");
+        } finally {
+            setEnviando(false);
+        }
+    }, [nuevoComentario, idLey, user, comentarios, router]);
+
+    const handleLikeComentario = useCallback(async (id: string) => {
+        if (!idLey || !user) {
+            if (!user) {
+                Alert.alert(
+                    "Iniciar Sesión",
+                    "Necesitas iniciar sesión para dar like",
+                    [
+                        { text: "Cancelar", style: "cancel" },
+                        { text: "Iniciar Sesión", onPress: () => router.push("/auth/login") }
+                    ]
+                );
+            }
+            return;
+        }
+
+        try {
+            const userId = user.dni || user.uid;
             // Call the Firestore service to like/unlike comment
-            const success = await ComentariosService.darLike(idLey, id, usuario.dni);
+            const success = await ComentariosService.darLike(idLey, id, userId);
 
             if (success) {
                 // Update local state
@@ -230,7 +185,7 @@ const ComentariosLeyScreen: React.FC = () => {
             console.error("Error al dar like:", error);
             Alert.alert("Error", "No se pudo actualizar el like");
         }
-    }, [idLey, usuario.dni]);
+    }, [idLey, user, router]);
 
     const renderComentario = useCallback(({ item }: { item: Comentario }) => {
         // Handle both Timestamp and Date objects
@@ -252,16 +207,29 @@ const ComentariosLeyScreen: React.FC = () => {
             })
             : 'Fecha no disponible';
 
+        const iniciales = item.usuario.nombreCompleto
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .substring(0, 2)
+            .toUpperCase();
+
+        const esComentarioPropio = user && (user.dni === item.usuario.dni || user.uid === item.usuario.dni);
+
         return (
-            <ThemedView style={styles.comentarioContainer}>
+            <ThemedView style={[
+                styles.comentarioContainer,
+                esComentarioPropio && styles.comentarioPropio
+            ]}>
                 <View style={styles.comentarioInitials}>
-                    <Text style={styles.initialsText}>
-                        {item.usuario.nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                    </Text>
+                    <Text style={styles.initialsText}>{iniciales}</Text>
                 </View>
                 <View style={styles.comentarioContent}>
                     <View style={styles.comentarioHeader}>
-                        <Text style={styles.nombreUsuario}>{item.usuario.nombreCompleto}</Text>
+                        <Text style={styles.nombreUsuario}>
+                            {item.usuario.nombreCompleto}
+                            {esComentarioPropio && <Text style={styles.autorTag}> (Tú)</Text>}
+                        </Text>
                         <Text style={styles.fechaComentario}>{fechaFormateada}</Text>
                     </View>
                     <Text style={styles.textoComentario}>{item.texto}</Text>
@@ -277,15 +245,22 @@ const ComentariosLeyScreen: React.FC = () => {
                             />
                             <Text style={styles.likeCount}>{item.likes}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.replyButton}>
-                            <Ionicons name="chatbubble-outline" size={18} color="#666" />
-                            <Text style={styles.replyText}>Responder</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
             </ThemedView>
         );
-    }, [handleLikeComentario]);
+    }, [handleLikeComentario, user]);
+
+    // Generar iniciales del usuario
+    const iniciales = useMemo(() => {
+        if (!user || !user.displayName) return "??";
+        return user.displayName
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .substring(0, 2)
+            .toUpperCase();
+    }, [user]);
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -341,106 +316,36 @@ const ComentariosLeyScreen: React.FC = () => {
                 >
                     <View style={styles.userInitials}>
                         <Text style={styles.initialsText}>
-                            {usuario.nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                            {iniciales}
                         </Text>
                     </View>
                     <TextInput
                         style={styles.input}
-                        placeholder="Escribe un comentario..."
+                        placeholder={user ? "Escribe un comentario..." : "Inicia sesión para comentar"}
                         multiline
                         value={nuevoComentario}
                         onChangeText={setNuevoComentario}
+                        editable={!!user}
                     />
                     {enviando ? (
                         <ActivityIndicator size="small" color="#007AFF" style={styles.sendButton} />
                     ) : (
                         <TouchableOpacity
-                            onPress={handleOpenModal}
-                            disabled={!nuevoComentario.trim()}
+                            onPress={handleEnviarComentario}
+                            disabled={!nuevoComentario.trim() || !user}
                             style={[
                                 styles.sendButton,
-                                !nuevoComentario.trim() && styles.disabledSendButton
+                                (!nuevoComentario.trim() || !user) && styles.disabledSendButton
                             ]}
                         >
-                            <Ionicons name="send" size={24} color={nuevoComentario.trim() ? "#007AFF" : "#ccc"} />
+                            <Ionicons
+                                name="send"
+                                size={24}
+                                color={(nuevoComentario.trim() && user) ? "#007AFF" : "#ccc"}
+                            />
                         </TouchableOpacity>
                     )}
                 </KeyboardAvoidingView>
-
-                {/*  */}
-                {isOpen && <View style={styles.overlay} />}
-
-                {/* BottomSheet para ingresar DNI */}
-                {isOpen && (
-                    <BottomSheet
-                        ref={sheetRef}
-                        snapPoints={snapPoints}
-                        enablePanDownToClose={true}
-                        onClose={handleCloseModal}
-                        index={0}
-                        keyboardBehavior="interactive"
-                    >
-                        <BottomSheetView style={styles.bottomSheetContentContainer}>
-                            <ScrollView
-                                style={{ width: '100%' }}
-                                contentContainerStyle={{ alignItems: 'center' }}
-                                showsVerticalScrollIndicator={false}
-                                keyboardShouldPersistTaps="handled"
-                            >
-                                <Text style={styles.bottomSheetTitle}>Confirma tu comentario</Text>
-                                <Text style={styles.bottomSheetText}>Ingrese su DNI para validar su comentario:</Text>
-                                <View style={styles.dniInputContainer}>
-                                    <TextInput
-                                        style={styles.dniInput}
-                                        placeholder="Ingrese su DNI"
-                                        keyboardType="numeric"
-                                        maxLength={8}
-                                        value={dni}
-                                        onChangeText={setDni}
-                                        autoFocus
-                                    />
-                                    <TouchableOpacity onPress={handleSearchDNI} disabled={isLoading}>
-                                        {isLoading ? (
-                                            <ActivityIndicator size="small" color="#007AFF" />
-                                        ) : (
-                                            <Ionicons name="search" size={24} color="black" />
-                                        )}
-                                    </TouchableOpacity>
-                                </View>
-
-                                {dniInfo && (
-                                    <ThemedView style={styles.dniInfoContainer}>
-                                        <ThemedText style={styles.dniInfoText}>{dniInfo}</ThemedText>
-                                    </ThemedView>
-                                )}
-
-                                <View style={styles.bottomSheetButtons}>
-                                    <TouchableOpacity
-                                        style={[styles.bottomSheetButton, styles.cancelButton]}
-                                        onPress={handleCloseModal}
-                                    >
-                                        <Text style={styles.cancelButtonText}>Cancelar</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.bottomSheetButton,
-                                            styles.confirmButton,
-                                            !nombreCompleto ? styles.disabledButton : {}
-                                        ]}
-                                        onPress={handleValidateDNI}
-                                        disabled={!nombreCompleto}
-                                    >
-                                        {isEnviandoComentario ? (
-                                            <ActivityIndicator size="small" color="white" />
-                                        ) : (
-                                            <Text style={styles.confirmButtonText}>Confirmar</Text>
-                                        )}
-                                    </TouchableOpacity>
-                                </View>
-                            </ScrollView>
-                        </BottomSheetView>
-                    </BottomSheet>
-                )}
             </SafeAreaView>
         </GestureHandlerRootView>
     );
@@ -499,6 +404,13 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#f0f0f0",
     },
+    comentarioPropio: {
+        backgroundColor: "#f7faff",
+        borderRadius: 8,
+        padding: 8,
+        borderLeftWidth: 3,
+        borderLeftColor: "#007AFF",
+    },
     comentarioInitials: {
         width: 40,
         height: 40,
@@ -526,6 +438,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#333",
     },
+    autorTag: {
+        color: "#007AFF",
+        fontStyle: "italic",
+    },
     fechaComentario: {
         fontSize: 12,
         color: "#999",
@@ -546,15 +462,6 @@ const styles = StyleSheet.create({
         marginRight: 20,
     },
     likeCount: {
-        marginLeft: 5,
-        fontSize: 14,
-        color: "#666",
-    },
-    replyButton: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    replyText: {
         marginLeft: 5,
         fontSize: 14,
         color: "#666",
@@ -616,104 +523,6 @@ const styles = StyleSheet.create({
         marginTop: 5,
         textAlign: "center",
         paddingHorizontal: 20,
-    },
-    dniInfoContainer: {
-        width: "100%",
-        padding: 12,
-        backgroundColor: "#f0f0f0",
-        borderRadius: 8,
-        marginBottom: 16,
-    },
-    dniInfoText: {
-        fontSize: 14,
-        lineHeight: 20,
-        color: "#333",
-        fontWeight: "600"
-    },
-    overlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
-    bottomSheetContentContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "flex-start",
-        backgroundColor: "white",
-        padding: 24,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16
-    },
-    bottomSheetTitle: {
-        fontSize: 22,
-        fontWeight: "bold",
-        marginBottom: 16,
-        color: "#222"
-    },
-    bottomSheetText: {
-        fontSize: 16,
-        marginBottom: 16,
-        textAlign: "center",
-        color: "#444"
-    },
-    bottomSheetButtons: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        width: "100%",
-        marginTop: 24
-    },
-    bottomSheetButton: {
-        flex: 1,
-        padding: 14,
-        borderRadius: 8,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2
-    },
-    cancelButton: {
-        backgroundColor: "#e0e0e0",
-        marginRight: 8
-    },
-    confirmButton: {
-        backgroundColor: "#4CAF50",
-        marginLeft: 8
-    },
-    cancelButtonText: {
-        color: "#333",
-        fontSize: 16,
-        fontWeight: "bold"
-    },
-    confirmButtonText: {
-        color: "white",
-        fontSize: 16,
-        fontWeight: "bold"
-    },
-    disabledButton: {
-        backgroundColor: "#9E9E9E",
-        opacity: 0.7
-    },
-    dniInputContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
-        width: "100%"
-    },
-    dniInput: {
-        flex: 1,
-        fontSize: 16,
-        padding: 0,
-        marginRight: 10
     },
 });
 

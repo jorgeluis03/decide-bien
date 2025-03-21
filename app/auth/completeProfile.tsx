@@ -66,8 +66,6 @@ export default function CompleteProfile() {
                 profileComplete: true
             });
 
-            console.log('Perfil completado correctamente');
-
             // Navegar a la pantalla principal
             router.replace('/tabs');
         } catch (error) {

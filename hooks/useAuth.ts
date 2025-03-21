@@ -31,34 +31,44 @@ export function useAuth() {
     // Log only on first initialization
     useEffect(() => {
         if (!initializationLoggedRef.current) {
-            console.log("Hook useAuth cargado");
             initializationLoggedRef.current = true;
         }
     }, []);
 
     useEffect(() => {
         if (!authListenerInitialized) {
-            console.log("Inicializando auth listener");
             authListenerInitialized = true;
 
             // Set up the Firebase Auth state listener
             const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+
                 if (firebaseUser) {
                     try {
                         // Get additional user data from Firestore
-                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                        const userDocRef = doc(db, 'users', firebaseUser.uid);
+                        const userDoc = await getDoc(userDocRef);
 
                         if (userDoc.exists()) {
                             const userData = userDoc.data();
+
+                            // Log cada campo crítico individualmente
                             const fullUser: User = {
                                 uid: firebaseUser.uid,
                                 email: firebaseUser.email || '',
                                 displayName: firebaseUser.displayName || userData.displayName || '',
-                                dni: userData.dni || '',
+                                dni: userData.dni || '', // Asegúrate de que este campo se incluya
                                 phoneNumber: firebaseUser.phoneNumber || '',
                                 photoURL: firebaseUser.photoURL || '',
                                 providerId: firebaseUser.providerId || '',
-                                isAnonymous: false, // Add this required field
+                                isAnonymous: false,
+                                // Añadir otros campos de perfil
+                                fechaNacimiento: userData.fechaNacimiento,
+                                departamento: userData.departamento,
+                                ocupacion: userData.ocupacion,
+                                profileComplete: userData.profileComplete || false,
+                                createdAt: userData.createdAt,
+                                lastLoginAt: userData.lastLoginAt,
+                                updatedAt: userData.updatedAt
                             };
 
                             setUser(fullUser);
@@ -85,7 +95,6 @@ export function useAuth() {
                         setAuthenticated(false);
                     }
                 } else {
-                    console.log("Auth state changed: No autenticado");
                     setUser(null);
                     setAuthenticated(false);
 
@@ -137,43 +146,68 @@ export function useAuth() {
      * Inicia sesión con correo y contraseña
      */
     const signInWithEmailAndPassword = useCallback(async (email: string, password: string) => {
-        setIsLoading(true); // Use setIsLoading
+        setIsLoading(true);
         setError(null);
 
         try {
-            const user = await AuthService.signInWithEmailAndPassword(email, password);
-            setUser(user);
-            return user;
+            const userCredential = await AuthService.signInWithEmailAndPassword(email, password);
+            // Necesitamos asegurarnos de que el estado se actualice aquí y no esperar a onAuthStateChanged
+            if (userCredential) {
+                const firebaseUser = userCredential;
+                // Obtener datos adicionales del usuario desde Firestore
+                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const fullUser: User = {
+                        uid: firebaseUser.uid,
+                        email: firebaseUser.email || '',
+                        displayName: firebaseUser.displayName || userData.displayName || '',
+                        dni: userData.dni || '',
+                        phoneNumber: firebaseUser.phoneNumber || '',
+                        photoURL: firebaseUser.photoURL || '',
+                        providerId: 'password',
+                        isAnonymous: false,
+                        fechaNacimiento: userData.fechaNacimiento,
+                        departamento: userData.departamento,
+                        ocupacion: userData.ocupacion,
+                        profileComplete: userData.profileComplete || false,
+                        createdAt: userData.createdAt,
+                        lastLoginAt: Date.now(),
+                        updatedAt: userData.updatedAt
+                    };
+
+                    // Actualizar el estado con los datos del usuario
+                    setUser(fullUser);
+                    setAuthenticated(true);
+
+                    // Guardar el estado de la sesión
+                    await SessionService.saveSessionState(true);
+                }
+            }
+            return userCredential;
         } catch (err: any) {
-            console.error('Sign in error:', err);
+            console.error('Error de autenticación:', err);
             setError(err.message || 'Error al iniciar sesión');
             throw err;
         } finally {
-            setIsLoading(false); // Use setIsLoading
+            setIsLoading(false);
         }
-    }, [setIsLoading, setError, setUser]);
+    }, [setIsLoading, setError, setUser, setAuthenticated]);
 
     /**
      * Cierra la sesión del usuario actual
      */
     const logout = useCallback(async () => {
-        console.log("Iniciando proceso de logout");
         setIsLoading(true); // Use setIsLoading
 
         try {
             // 1. Limpiar datos de sesión local primero
-            console.log("1. Limpiando sesión local");
             await SessionService.clearSession();
-
             // 2. Cerrar sesión en Firebase Auth
-            console.log("2. Cerrando sesión en Firebase");
             await AuthService.signOut();
-
             // 3. Actualizar el estado local al final
-            console.log("3. Actualizando estado de la aplicación");
             signOut(); // Esta es la función del store
-
-            console.log("Logout completado con éxito");
             return true;
         } catch (err: any) {
             console.error('Error detallado al cerrar sesión:', err);
@@ -266,24 +300,8 @@ export function useAuth() {
         isLoading, // Now correctly references the renamed state variable
         error,
         registerWithEmailAndPassword,
-        signInWithEmailAndPassword: async (email: string, password: string) => {
-            try {
-                setIsLoading(true); // Use setIsLoading
-                setError(null);
-                console.log(`AuthService: Iniciando sesión ${email}`);
-                await AuthService.signInWithEmailAndPassword(email, password);
-                // No es necesario actualizar el estado, lo hará el auth listener
-            } catch (error: any) {
-                console.error("Error en login:", error);
-                setError(error.message || 'Error al iniciar sesión');
-                throw error;
-            } finally {
-                setIsLoading(false); // Use setIsLoading
-            }
-        },
-
+        signInWithEmailAndPassword,
         logout,
-
         updateProfile,
         refreshUserData,
         sendPasswordReset
