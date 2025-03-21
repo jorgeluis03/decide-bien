@@ -92,11 +92,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 10,
         marginVertical: 10,
-        paddingHorizontal: 10,
     },
     dateButtonContainer: {
-        flexDirection: "row",
-        alignItems: "center",
         backgroundColor: "#f0f0f0",
         paddingHorizontal: 12,
         paddingVertical: 6,
@@ -105,7 +102,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 3,
-        elevation: 4,
+        alignItems: "center",
+        justifyContent: "center",
     },
     dateButton: {
         flexDirection: "row",

@@ -17,6 +17,7 @@ import { fetchData } from "../../utils/fetchData";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateFilter from "@/components/screens/DateFilter";
+import NumberFilter from "@/features/leyes/components/NumberFilter";
 import LeyItem from "@/components/screens/LeyItem";
 import { BASE_URL } from "@/constants/config";
 import { LeyResumen } from "@/features/leyes/types";
@@ -37,6 +38,7 @@ export default function LeyesTab() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [estadoSeleccionado, setEstadoSeleccionado] = useState<number | null>(null);
+  const [leyNumber, setLeyNumber] = useState<number | null>(null);
 
   const debouncedQuery = useDebounce(query, 500);
   const fadeAnim = useState(new Animated.Value(0))[0];
@@ -59,6 +61,7 @@ export default function LeyesTab() {
         fecPresentacionDesde: startDate ? startDate.toISOString().split("T")[0] : null,
         fecPresentacionHasta: endDate ? endDate.toISOString().split("T")[0] : null,
         estadoId: estadoSeleccionado || null,
+        pleyNum: leyNumber || null,
       };
 
       const data = await fetchData<{ data: { proyectos: LeyResumen[]; rowsTotal: number } }>(API_URL, "POST", undefined, body);
@@ -79,7 +82,7 @@ export default function LeyesTab() {
 
   useEffect(() => {
     fetchLeyes(true);
-  }, [debouncedQuery, startDate, endDate, estadoSeleccionado]);
+  }, [debouncedQuery, startDate, endDate, estadoSeleccionado, leyNumber]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -122,13 +125,19 @@ export default function LeyesTab() {
         </ThemedView>
       )}
 
-      {/* Filtro por fechas */}
-      <DateFilter
-        onDateChange={(start, end) => {
-          setStartDate(start);
-          setEndDate(end);
-        }}
-      />
+      {/* Fila de filtros numéricos y de fecha */}
+      <ThemedView style={styles.filtersRow}>
+        <NumberFilter
+          onNumberChange={(num) => setLeyNumber(num)}
+        />
+
+        <DateFilter
+          onDateChange={(start, end) => {
+            setStartDate(start);
+            setEndDate(end);
+          }}
+        />
+      </ThemedView>
 
       {/* Estados de las leyes */}
       <EstadoFilter onEstadoChange={(estado) => setEstadoSeleccionado(estado)} />
@@ -164,4 +173,10 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 16, height: 40 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   separator: { height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 },
+  filtersRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
 });
