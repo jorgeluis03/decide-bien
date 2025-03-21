@@ -11,6 +11,11 @@ interface AuthStore extends AuthState {
   setVerificationId: (verificationId: string | null) => void;
   signOut: () => void;
   updateUserProfile: (userData: Partial<User>) => void;
+  
+  // Missing properties
+  isInitialized: boolean;
+  setAuthenticated: (isAuthenticated: boolean) => void;
+  setInitialized: (isInitialized: boolean) => void;
 }
 
 // Create store with persistence
@@ -23,6 +28,7 @@ export const useAuthStore = create<AuthStore>()(
       error: null,
       verificationId: null,
       isAuthenticated: false,
+      isInitialized: false, // Add missing state property
 
       // Actions
       setUser: (user) => set({ 
@@ -42,13 +48,18 @@ export const useAuthStore = create<AuthStore>()(
         set((state) => ({ 
           user: state.user ? { ...state.user, ...userData } : null 
         })),
+      
+      // Add missing action methods
+      setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
+      setInitialized: (isInitialized) => set({ isInitialized }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ 
         user: state.user,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
+        isInitialized: state.isInitialized // Also persist initialization state
       }),
     }
   )

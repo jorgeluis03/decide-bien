@@ -3,14 +3,13 @@ import { useFonts } from 'expo-font';
 import { Slot, useRouter, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { ReactNode, useEffect, useState } from 'react';
-import { View, ActivityIndicator, Text } from 'react-native';
-import 'react-native-reanimated';
-
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { ActivityIndicator, Text, View } from 'react-native';
 
+// Keep splash screen visible while resources load
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
@@ -63,7 +62,7 @@ function AuthenticationGuard({ children }: { children: ReactNode }) {
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#007AFF" />
         <Text style={{ marginTop: 10 }}>Iniciando aplicación...</Text>
-      </View>
+    </View>
     );
   }
 
@@ -75,10 +74,12 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-
-  useEffect(() => {
+  
+  const onLayoutRootView = useCallback(async () => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      // Only hide splash screen from here if we're not handling it elsewhere
+      // This ensures fonts are ready before we hide the splash screen
+      await SplashScreen.hideAsync();
     }
   }, [loaded]);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
@@ -10,65 +10,96 @@ import { SessionService } from '@/services/firebase/SessionService';
 let authListenerInitialized = false;
 
 export function useAuth() {
-    console.log("Hook useAuth cargado");
+    // Use refs to track initialization and prevent redundant logs
+    const initializationLoggedRef = useRef(false);
 
-    const [isInitialized, setIsInitialized] = useState(false);
     const {
         user,
-        isLoading,
-        error,
         isAuthenticated,
+        isInitialized,
         setUser,
-        setLoading,
-        setError,
-        signOut,
-        updateUserProfile
+        setAuthenticated,
+        setInitialized,
+        updateUserProfile,
+        signOut
     } = useAuthStore();
 
+    // Rename this to isLoading for consistency
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Log only on first initialization
     useEffect(() => {
-        if (authListenerInitialized) {
-            setIsInitialized(true);
-            return;
+        if (!initializationLoggedRef.current) {
+            console.log("Hook useAuth cargado");
+            initializationLoggedRef.current = true;
         }
+    }, []);
 
-        console.log("Inicializando auth listener");
-        authListenerInitialized = true;
-        setLoading(true);
+    useEffect(() => {
+        if (!authListenerInitialized) {
+            console.log("Inicializando auth listener");
+            authListenerInitialized = true;
 
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            try {
+            // Set up the Firebase Auth state listener
+            const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
                 if (firebaseUser) {
-                    console.log("Auth state changed: Autenticado");
+                    try {
+                        // Get additional user data from Firestore
+                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
 
-                    setUser({
-                        uid: firebaseUser.uid,
-                        email: firebaseUser.email,
-                        displayName: firebaseUser.displayName,
-                        phoneNumber: firebaseUser.phoneNumber,
-                        photoURL: firebaseUser.photoURL,
-                        providerId: firebaseUser.providerId,
-                        isAnonymous: firebaseUser.isAnonymous,
-                    });
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            const fullUser: User = {
+                                uid: firebaseUser.uid,
+                                email: firebaseUser.email || '',
+                                displayName: firebaseUser.displayName || userData.displayName || '',
+                                dni: userData.dni || '',
+                                phoneNumber: firebaseUser.phoneNumber || '',
+                                photoURL: firebaseUser.photoURL || '',
+                                providerId: firebaseUser.providerId || '',
+                                isAnonymous: false, // Add this required field
+                            };
 
-                    await SessionService.updateLastActive();
+                            setUser(fullUser);
+                            setAuthenticated(true);
+
+                            // Save session state
+                            await SessionService.saveSessionState(true);
+                        } else {
+                            // User exists in Firebase Auth but not in Firestore
+                            setUser({
+                                uid: firebaseUser.uid,
+                                email: firebaseUser.email || '',
+                                displayName: firebaseUser.displayName || '',
+                                dni: '',
+                                phoneNumber: firebaseUser.phoneNumber || '',
+                                photoURL: firebaseUser.photoURL || '',
+                                providerId: firebaseUser.providerId || '',
+                                isAnonymous: false, // Add this required field
+                            });
+                            setAuthenticated(true);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                        setAuthenticated(false);
+                    }
                 } else {
                     console.log("Auth state changed: No autenticado");
                     setUser(null);
-                }
-            } catch (error) {
-                console.error("Error en el listener de autenticación:", error);
-                setError("Error al gestionar el estado de autenticación");
-            } finally {
-                setLoading(false);
-                setIsInitialized(true);
-            }
-        });
+                    setAuthenticated(false);
 
-        return () => {
-            console.log("Limpiando auth listener");
-            unsubscribe();
-        };
-    }, []);
+                    // Clear session state
+                    await SessionService.clearSession();
+                }
+
+                setInitialized(true);
+            });
+
+            // Cleanup function to unsubscribe from the listener
+            return () => unsubscribe();
+        }
+    }, [setAuthenticated, setInitialized, setUser]);
 
     /**
      * Registra un nuevo usuario con correo y contraseña
@@ -79,7 +110,7 @@ export function useAuth() {
         displayName: string,
         dni: string
     ) => {
-        setLoading(true);
+        setIsLoading(true); // Use setIsLoading instead of setLoading
         setError(null);
 
         try {
@@ -98,15 +129,15 @@ export function useAuth() {
             setError(err.message || 'Error al registrar usuario');
             throw err;
         } finally {
-            setLoading(false);
+            setIsLoading(false); // Use setIsLoading instead of setLoading
         }
-    }, [setLoading, setError, setUser]);
+    }, [setIsLoading, setError, setUser]);
 
     /**
      * Inicia sesión con correo y contraseña
      */
     const signInWithEmailAndPassword = useCallback(async (email: string, password: string) => {
-        setLoading(true);
+        setIsLoading(true); // Use setIsLoading
         setError(null);
 
         try {
@@ -118,16 +149,16 @@ export function useAuth() {
             setError(err.message || 'Error al iniciar sesión');
             throw err;
         } finally {
-            setLoading(false);
+            setIsLoading(false); // Use setIsLoading
         }
-    }, [setLoading, setError, setUser]);
+    }, [setIsLoading, setError, setUser]);
 
     /**
- * Cierra la sesión del usuario actual
- */
+     * Cierra la sesión del usuario actual
+     */
     const logout = useCallback(async () => {
         console.log("Iniciando proceso de logout");
-        setLoading(true);
+        setIsLoading(true); // Use setIsLoading
 
         try {
             // 1. Limpiar datos de sesión local primero
@@ -149,9 +180,9 @@ export function useAuth() {
             setError(err.message || 'Error al cerrar sesión');
             throw err;
         } finally {
-            setLoading(false);
+            setIsLoading(false); // Use setIsLoading
         }
-    }, [setLoading, setError, signOut]);
+    }, [setIsLoading, setError, signOut]);
 
     /**
      * Actualiza el perfil del usuario actual
@@ -163,7 +194,7 @@ export function useAuth() {
             throw new Error(error);
         }
 
-        setLoading(true);
+        setIsLoading(true); // Use setIsLoading
 
         try {
             await AuthService.updateUserProfile(user.uid, userData);
@@ -173,9 +204,9 @@ export function useAuth() {
             setError(err.message || 'Error al actualizar perfil');
             throw err;
         } finally {
-            setLoading(false);
+            setIsLoading(false); // Use setIsLoading
         }
-    }, [user, setLoading, setError, updateUserProfile]);
+    }, [user, setIsLoading, setError, updateUserProfile]);
 
     /**
      * Obtiene los datos actualizados del usuario
@@ -185,7 +216,7 @@ export function useAuth() {
             return null;
         }
 
-        setLoading(true);
+        setIsLoading(true); // Use setIsLoading
 
         try {
             const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -206,15 +237,15 @@ export function useAuth() {
             setError(err.message || 'Error al obtener datos del usuario');
             return user;
         } finally {
-            setLoading(false);
+            setIsLoading(false); // Use setIsLoading
         }
-    }, [user, setLoading, setError, setUser]);
+    }, [user, setIsLoading, setError, setUser]);
 
     /**
      * Envía un correo para restablecer la contraseña
      */
     const sendPasswordReset = useCallback(async (email: string) => {
-        setLoading(true);
+        setIsLoading(true); // Use setIsLoading
         setError(null);
 
         try {
@@ -224,20 +255,20 @@ export function useAuth() {
             setError(err.message || 'Error al enviar correo de restablecimiento');
             throw err;
         } finally {
-            setLoading(false);
+            setIsLoading(false); // Use setIsLoading
         }
-    }, [setLoading, setError]);
+    }, [setIsLoading, setError]);
 
     return {
         user,
-        isLoading,
-        error,
         isAuthenticated,
         isInitialized,
+        isLoading, // Now correctly references the renamed state variable
+        error,
         registerWithEmailAndPassword,
         signInWithEmailAndPassword: async (email: string, password: string) => {
             try {
-                setLoading(true);
+                setIsLoading(true); // Use setIsLoading
                 setError(null);
                 console.log(`AuthService: Iniciando sesión ${email}`);
                 await AuthService.signInWithEmailAndPassword(email, password);
@@ -247,7 +278,7 @@ export function useAuth() {
                 setError(error.message || 'Error al iniciar sesión');
                 throw error;
             } finally {
-                setLoading(false);
+                setIsLoading(false); // Use setIsLoading
             }
         },
 

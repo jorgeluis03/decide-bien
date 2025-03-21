@@ -3,49 +3,57 @@ import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { SessionService } from '@/services/firebase/SessionService';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Prevent the splash screen from auto-hiding
+SplashScreen.preventAutoHideAsync();
 
 export default function Index() {
-  const { isAuthenticated, isInitialized } = useAuth();
-  const [checking, setChecking] = useState(true);
-  const [hasSession, setHasSession] = useState(false);
+  const { isAuthenticated, isInitialized, user } = useAuth();
+  const [finalAuthState, setFinalAuthState] = useState<boolean | null>(null);
 
   useEffect(() => {
-    async function checkSession() {
+    async function checkAuthState() {
       try {
-        // Verificar si hay una sesión activa
-        const sessionActive = await SessionService.isSessionActive();
-        console.log("Estado de sesión en Index:", sessionActive);
-        setHasSession(sessionActive);
+        // First check for a cached user session - this is fast
+        const cachedSession = await SessionService.getCachedSession();
+        
+        if (cachedSession) {
+          setFinalAuthState(true);
+          return;
+        }
+        
+        // If Firebase auth is initialized, use that result
+        if (isInitialized) {
+          if (isAuthenticated) {
+            setFinalAuthState(true);
+          } else {
+            // As a fallback, check the session
+            const sessionActive = await SessionService.isSessionActive();
+            setFinalAuthState(sessionActive);
+          }
+        }
       } catch (error) {
-        console.error("Error al verificar sesión:", error);
+        console.error("Error during auth check:", error);
+        setFinalAuthState(false);
       } finally {
-        setChecking(false);
+        // Hide splash screen once we've determined auth state
+        SplashScreen.hideAsync();
       }
     }
 
-    if (isInitialized && !isAuthenticated) {
-      checkSession();
-    } else if (isInitialized && isAuthenticated) {
-      setChecking(false);
-    }
+    checkAuthState();
   }, [isAuthenticated, isInitialized]);
 
-  // Mostrar pantalla de carga mientras verificamos
-  if (!isInitialized || checking) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 10 }}>Verificando sesión...</Text>
-      </View>
-    );
+  // While still determining auth state, return null to keep splash screen visible
+  if (finalAuthState === null) {
+    return null;
   }
 
-  // Redirección basada en el estado de autenticación
-  if (isAuthenticated || hasSession) {
-    console.log("Redirigiendo a tabs (usuario autenticado)");
+  // Redirect based on authentication state
+  if (finalAuthState) {
     return <Redirect href="/tabs" />;
   } else {
-    console.log("Redirigiendo a login (usuario no autenticado)");
     return <Redirect href="/auth/login" />;
   }
 }
