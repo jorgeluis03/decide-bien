@@ -1,36 +1,76 @@
 import React from "react";
-import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import { Image, TouchableOpacity, View, StyleSheet, ImageSourcePropType } from "react-native";
 import { ThemedText } from '@/components/ThemedText';
-import { Congresista } from '@/types';
 
 interface CongresistaItemProps {
-    congresista: Congresista;
+    congresista: {
+        id?: string;
+        nombre: string;
+        partido: string;
+        email: string;
+        fotoUrl: string;
+        votacionObtenida: number;
+        periodoInicio: string;
+        periodoTermino: string;
+        distritoElectoral: string;
+        condicion: string;
+    };
+    onPress?: () => void;
 }
 
-const CongresistaItem: React.FC<CongresistaItemProps> = ({ congresista }) => {
+const CongresistaItem: React.FC<CongresistaItemProps> = ({ congresista, onPress }) => {
+    // Función para formatear fechas (YYYY-MM-DD a DD/MM/YYYY)
+    const formatDate = (dateString: string) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    const periodoFormateado = `${formatDate(congresista.periodoInicio)} - ${formatDate(congresista.periodoTermino)}`;
+
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={onPress}>
             <View style={styles.imageContainer}>
-                <Image source={congresista.foto} style={styles.image} />
-                <Link href='/leyes/detalle' asChild>
-                    <TouchableOpacity style={styles.button}>
-                        <ThemedText style={styles.buttonText}>Ver más</ThemedText>
-                    </TouchableOpacity>
-                </Link>
+                <Image 
+                    source={{ uri: congresista.fotoUrl }} 
+                    style={[
+                        styles.image,
+                        congresista.condicion === "en Ejercicio" 
+                            ? styles.activeImage 
+                            : styles.inactiveImage
+                    ]}
+                />
+                <View style={[
+                    styles.statusIndicator,
+                    congresista.condicion === "en Ejercicio" 
+                        ? styles.activeStatus 
+                        : styles.inactiveStatus
+                ]}>
+                    <ThemedText style={styles.statusText}>
+                        {congresista.condicion === "en Ejercicio" ? "Activo" : congresista.condicion}
+                    </ThemedText>
+                </View>
             </View>
+            
             <View style={styles.info}>
                 <ThemedText style={styles.name}>{congresista.nombre}</ThemedText>
+                <ThemedText style={styles.partido}>{congresista.partido}</ThemedText>
+                
                 <View style={styles.row}>
-                    <ThemedText style={styles.detail}>🎂 {congresista.edad} años</ThemedText>
-                    <ThemedText style={styles.detail}>🎓 {congresista.profesion}</ThemedText>
+                    <View style={styles.detailContainer}>
+                        <ThemedText style={styles.detailLabel}>Distrito</ThemedText>
+                        <ThemedText style={styles.detailValue}>{congresista.distritoElectoral}</ThemedText>
+                    </View>
+                    
+                    <View style={styles.detailContainer}>
+                        <ThemedText style={styles.detailLabel}>Votos</ThemedText>
+                        <ThemedText style={styles.detailValue}>{congresista.votacionObtenida.toLocaleString()}</ThemedText>
+                    </View>
                 </View>
-                <ThemedText style={styles.detail}>{congresista.educacion}</ThemedText>
-                {congresista.trayectoria && (
-                    <ThemedText style={styles.trayectoria}>{congresista.trayectoria}</ThemedText>
-                )}
+                
+                <ThemedText style={styles.periodo}>{periodoFormateado}</ThemedText>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -39,57 +79,83 @@ export default CongresistaItem;
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        paddingVertical: 12,
+        padding: 16,
         alignItems: "center",
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
         backgroundColor: "#fff",
+        shadowColor: "#000",
     },
     imageContainer: {
+        position: "relative",
         alignItems: "center",
         marginRight: 16,
     },
     image: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 90,
+        height: 90,
+        borderRadius: 45,
         borderWidth: 2,
-        borderColor: "#0a7ea4",
+    },
+    activeImage: {
+        borderColor: "#1e88e5",
+    },
+    inactiveImage: {
+        borderColor: "#9e9e9e",
+        opacity: 0.8,
+    },
+    statusIndicator: {
+        position: "absolute",
+        bottom: 0,
+        paddingVertical: 3,
+        paddingHorizontal: 8,
+        borderRadius: 12,
+    },
+    activeStatus: {
+        backgroundColor: "#4caf50",
+    },
+    inactiveStatus: {
+        backgroundColor: "#9e9e9e",
+    },
+    statusText: {
+        color: "#fff",
+        fontSize: 10,
+        fontWeight: "bold",
     },
     info: {
         flex: 1,
     },
     name: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: "bold",
         color: "#333",
+        marginBottom: 4,
+    },
+    partido: {
+        fontSize: 14,
+        color: "#1e88e5",
+        fontWeight: "500",
+        marginBottom: 8,
     },
     row: {
         flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 6,
-        marginTop: 4,
+        justifyContent: "space-between",
+        marginBottom: 8,
     },
-    detail: {
+    detailContainer: {
+        flex: 1,
+        marginRight: 8,
+    },
+    detailLabel: {
+        fontSize: 12,
+        color: "#757575",
+    },
+    detailValue: {
         fontSize: 14,
-        color: "#555",
+        color: "#424242",
+        fontWeight: "500",
     },
-    trayectoria: {
+    periodo: {
         fontSize: 13,
-        color: "#777",
-        fontStyle: "italic",
-        marginTop: 6,
-    },
-    button: {
-        marginTop: 8,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        backgroundColor: "#0a7ea4",
-        borderRadius: 6,
-    },
-    buttonText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 14,
+        color: "#616161",
+        marginTop: 4,
     },
 });
